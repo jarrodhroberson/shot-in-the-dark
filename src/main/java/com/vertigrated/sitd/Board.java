@@ -9,10 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
-import static com.vertigrated.sitd.Coordinate.NATURAL_X;
-import static com.vertigrated.sitd.Coordinate.NATURAL_Y;
 import static com.vertigrated.sitd.Orientation.HORIZONTAL;
 import static com.vertigrated.sitd.Orientation.VERTICAL;
 import static java.lang.String.format;
@@ -24,9 +23,11 @@ public class Board
     @Nonnull
     public static Board build(@Nonnull final Board b, @Nonnull final List<Target> targets)
     {
-        for (final Target t : targets)
+        final Iterator<Target> it = targets.iterator();
+        for (int i = 0; it.hasNext(); i++)
         {
-            if (!b.place(t))
+            final Target t = it.next();
+            if (!b.place(t,Integer.toString(i).charAt(0)))
             {
                 throw new IllegalArgumentException(format("%s overlaps with a previously placed target!", t));
             }
@@ -41,7 +42,7 @@ public class Board
         for (int i = 0; i < targetCount; i++)
         {
             final Integer size = rnd.nextInt(maxTargetSize) + minTargetSize;
-            b.place(b.randomlySelectedLocation(size));
+            b.place(b.randomlySelectedLocation(size),Integer.toString(i).charAt(0));
         }
         return b;
     }
@@ -49,7 +50,8 @@ public class Board
     public final Integer width;
     public final Integer height;
     private final Random rnd = new Random();
-    private final Table<Integer, Integer, Integer> board;
+    private final AtomicInteger targetCounter;
+    private final Table<Integer, Integer, Character> board;
 
     public Board(@Nonnull final Integer dimension)
     {
@@ -60,12 +62,13 @@ public class Board
     {
         this.width = width;
         this.height = height;
+        this.targetCounter = new AtomicInteger();
         this.board = ArrayTable.create(ContiguousSet.create(Range.closedOpen(0, width), DiscreteDomain.integers()).asList(), ContiguousSet.create(Range.closedOpen(0, height), DiscreteDomain.integers()).asList());
         for (final Integer r : this.board.rowKeySet())
         {
             for (final Integer c : this.board.columnKeySet())
             {
-                this.board.put(r, c, 0);
+                this.board.put(r, c, 'E');
             }
         }
     }
@@ -73,7 +76,7 @@ public class Board
     @Nonnull
     private Set<Coordinate> findOpenSpaces(@Nonnull final Integer size, @Nonnull final Orientation orientation)
     {
-        final ImmutableSortedSet.Builder<Coordinate> ilb = ImmutableSortedSet.orderedBy(NATURAL_X.compound(NATURAL_Y));
+        final ImmutableSet.Builder<Coordinate> ilb = ImmutableSet.builder();
         if (HORIZONTAL.equals(orientation))
         {
             for (int r = 0; r < this.height; r++)
@@ -139,16 +142,16 @@ public class Board
         }
     }
 
-    public boolean place(@Nonnull final Target t)
+    public boolean place(@Nonnull final Target t, @Nonnull final Character placeholder)
     {
-        if (targetOverlaps(t)) { return false; }
+        if (targetOverlaps(t)) { return this.place(this.randomlySelectedLocation(t.size()),placeholder); }
         else
         {
             for (final Coordinate c : t.coordinates)
             {
-                this.board.put(c.x, c.y, 1);
+                this.board.put(c.x, c.y, placeholder);
             }
-            L.debug("Placed {}", t);
+            L.debug("Placed {} {}", t, placeholder);
             return true;
         }
     }
@@ -159,7 +162,7 @@ public class Board
         {
             if (this.test(c.x, c.y))
             {
-                L.warn("{} overlaps with previous target at {}", coordinates, c);
+                //L.warn("{} overlaps with previous target at {}", coordinates, c);
                 return true;
             }
         }
@@ -187,10 +190,15 @@ public class Board
         return it.next();
     }
 
+    Character at(@Nonnull final Integer row, @Nonnull final Integer column)
+    {
+        return this.board.get(row,column);
+    }
+
     public boolean test(@Nonnull final Integer row, @Nonnull final Integer column)
     {
         checkElementIndex(row, this.height, "Row");
         checkElementIndex(column, this.width, "Column");
-        return !this.board.get(row, column).equals(0);
+        return !this.board.get(row, column).equals('E');
     }
 }
