@@ -1,6 +1,7 @@
 .project
 .classpath
 .idea/
+target/
 *.class
 
 # Package Files #
