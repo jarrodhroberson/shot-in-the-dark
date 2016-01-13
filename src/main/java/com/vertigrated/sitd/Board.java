@@ -27,7 +27,7 @@ public class Board
         for (int i = 0; it.hasNext(); i++)
         {
             final Target t = it.next();
-            if (!b.place(t,Integer.toString(i).charAt(0)))
+            if (!b.place(t, Integer.toString(i).charAt(0)))
             {
                 throw new IllegalArgumentException(format("%s overlaps with a previously placed target!", t));
             }
@@ -42,7 +42,10 @@ public class Board
         for (int i = 0; i < targetCount; i++)
         {
             final Integer size = Math.min(rnd.nextInt(maxTargetSize) + minTargetSize, maxTargetSize);
-            b.place(b.randomlySelectedLocation(size),Integer.toString(i).charAt(0));
+            while (!b.place(b.randomlySelectedLocation(size), Integer.toString(i).charAt(0)))
+            {
+                // do nothing
+            }
         }
         return b;
     }
@@ -144,7 +147,7 @@ public class Board
 
     public boolean place(@Nonnull final Target t, @Nonnull final Character placeholder)
     {
-        if (targetOverlaps(t)) { return this.place(this.randomlySelectedLocation(t.size()),placeholder); }
+        if (targetOverlaps(t)) { return false; }
         else
         {
             for (final Coordinate c : t.coordinates)
@@ -160,11 +163,7 @@ public class Board
     {
         for (final Coordinate c : coordinates)
         {
-            if (this.test(c.x, c.y))
-            {
-                //L.warn("{} overlaps with previous target at {}", coordinates, c);
-                return true;
-            }
+            if (this.test(c.x, c.y)) { return true; }
         }
         return false;
     }
@@ -192,7 +191,7 @@ public class Board
 
     Character at(@Nonnull final Integer row, @Nonnull final Integer column)
     {
-        return this.board.get(row,column);
+        return this.board.get(row, column);
     }
 
     public boolean test(@Nonnull final Integer row, @Nonnull final Integer column)
