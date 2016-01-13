@@ -41,7 +41,7 @@ public class Board
         final Random rnd = new Random();
         for (int i = 0; i < targetCount; i++)
         {
-            final Integer size = rnd.nextInt(maxTargetSize) + minTargetSize;
+            final Integer size = Math.min(rnd.nextInt(maxTargetSize) + minTargetSize, maxTargetSize);
             b.place(b.randomlySelectedLocation(size),Integer.toString(i).charAt(0));
         }
         return b;

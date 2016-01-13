@@ -8,10 +8,17 @@ import java.io.OutputStreamWriter;
 
 public class AsciiBoardWriter implements BoardWriter
 {
+    private final Character empty;
     private final OutputStreamWriter osw;
 
     public AsciiBoardWriter(@Nonnull final OutputStreamWriter osw)
     {
+        this('.', osw);
+    }
+
+    public AsciiBoardWriter(@Nonnull Character empty, @Nonnull final OutputStreamWriter osw)
+    {
+        this.empty = empty;
         this.osw = osw;
     }
 

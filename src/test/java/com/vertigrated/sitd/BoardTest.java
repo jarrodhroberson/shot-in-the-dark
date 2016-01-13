@@ -19,7 +19,7 @@ public class BoardTest
     @Test
     public void createRandomTargets() throws Exception
     {
-        final Board b = Board.build(new Board(10), 2, 5, 6);
+        final Board b = Board.build(new Board(10), 2, 5, 5);
         final OutputStreamWriter osw = new OutputStreamWriter(System.out);
         final BoardWriter bw = new AsciiBoardWriter(osw);
         bw.write(b);
