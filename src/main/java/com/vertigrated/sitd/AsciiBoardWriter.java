@@ -40,7 +40,8 @@ public class AsciiBoardWriter implements BoardWriter
         {
             for (int c = 0; c < b.width; c++)
             {
-                this.write(b.at(r,c));
+
+                this.write(b.test(r,c) ? b.at(r,c) : this.empty);
             }
             this.write("\n");
         }
