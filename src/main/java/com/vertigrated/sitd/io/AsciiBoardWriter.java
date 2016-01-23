@@ -1,6 +1,7 @@
-package com.vertigrated.sitd;
+package com.vertigrated.sitd.io;
 
 import com.google.common.base.Throwables;
+import com.vertigrated.sitd.board.Board;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -10,11 +11,6 @@ public class AsciiBoardWriter implements BoardWriter
 {
     private final Character empty;
     private final OutputStreamWriter osw;
-
-    public AsciiBoardWriter(@Nonnull final OutputStreamWriter osw)
-    {
-        this('.', osw);
-    }
 
     public AsciiBoardWriter(@Nonnull Character empty, @Nonnull final OutputStreamWriter osw)
     {
@@ -40,8 +36,7 @@ public class AsciiBoardWriter implements BoardWriter
         {
             for (int c = 0; c < b.width; c++)
             {
-
-                this.write(b.test(r,c) ? b.at(r,c) : this.empty);
+                this.write(b.test(r,c) ? 'X' : this.empty);
             }
             this.write("\n");
         }
