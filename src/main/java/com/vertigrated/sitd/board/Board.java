@@ -43,7 +43,8 @@ public class Board
         final ImmutableMap.Builder<Coordinate, Target> imb = ImmutableMap.builder();
         for (final Target t : targets)
         {
-            for (final Coordinate c : Coordinate.coordinates(t.coordinates))
+            final Set<Coordinate> coordinates = Coordinate.coordinates(t.coordinates);
+            for (final Coordinate c : coordinates)
             {
                 imb.put(c, t);
             }
@@ -105,7 +106,8 @@ public class Board
 
     public Target at(@Nonnull final Integer row, @Nonnull final Integer column)
     {
-        return this.targetByCoordinate.get(new Coordinate(row, column));
+        final Coordinate key = new Coordinate(row, column);
+        return this.targetByCoordinate.get(key);
     }
 
     public boolean test(@Nonnull final Integer row, @Nonnull final Integer column)

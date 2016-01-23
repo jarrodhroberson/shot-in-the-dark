@@ -15,7 +15,7 @@ public class BoardTest
     @Test
     public void createSquareBoard() throws Exception
     {
-        final Board b = new Board.Builder().dimension(10).targets(new RandomTargetPlacementStrategy(2,5,5)).build();
+        final Board b = new Board.Builder().dimension(10).targets(new RandomTargetPlacementStrategy(2,5,3)).build();
         final OutputStreamWriter osw = new OutputStreamWriter(System.out);
         final BoardWriter bw = new AsciiBoardWriter(EMPTY,osw);
         bw.write(b);

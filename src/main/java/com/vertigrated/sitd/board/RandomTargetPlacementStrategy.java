@@ -69,20 +69,20 @@ public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target
         final ImmutableSet.Builder<Coordinate> ilb = ImmutableSet.builder();
         if (HORIZONTAL.equals(orientation))
         {
-            for (int r = 0; r < b.height; r++)
+            for (int c = 0; c <= b.height; c++)
             {
-                for (int c = 0; c < b.width; c++)
+                for (int r = 0; r < b.width; r++)
                 {
                     final Coordinate start = new Coordinate(r, c);
-                    final Coordinate end = new Coordinate(r, c + size - 1);
+                    final Coordinate end = new Coordinate(r + size - 1, c);
                     final Range<Coordinate> range = Range.closed(start, end);
                     final Set<Range<Coordinate>> taken = b.taken().asRanges();
-                    if (taken.isEmpty()) { ilb.add(start); }
+                    if (size < b.height - r - 1 && taken.isEmpty()) { ilb.add(start); }
                     else
                     {
                         for (final Range<Coordinate> rc : taken)
                         {
-                            if (b.width - c >= size || rc.isConnected(range)) { break; }
+                            if (size > b.height - r - 1 || rc.isConnected(range)) { break; }
                             else { ilb.add(start); }
                         }
                     }
@@ -91,20 +91,20 @@ public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target
         }
         else
         {
-            for (int c = 1; c <= b.height; c++)
+            for (int r = 0; r < b.height; r++)
             {
-                for (int r = 1; r < b.width; r++)
+                for (int c = 0; c < b.width; c++)
                 {
                     final Coordinate start = new Coordinate(r, c);
-                    final Coordinate end = new Coordinate(r + size - 1, c);
+                    final Coordinate end = new Coordinate(r, c + size - 1);
                     final Range<Coordinate> range = Range.closed(start, end);
                     final Set<Range<Coordinate>> taken = b.taken().asRanges();
-                    if (taken.isEmpty()) { ilb.add(start); }
+                    if (size < b.width - c - 1 && taken.isEmpty()) { ilb.add(start); }
                     else
                     {
                         for (final Range<Coordinate> rc : taken)
                         {
-                            if (b.height - r >= size || rc.isConnected(range)) { break; }
+                            if (size > b.width - c - 1 || rc.isConnected(range)) { break; }
                             else { ilb.add(start); }
                         }
                     }
