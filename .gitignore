@@ -4,6 +4,8 @@
 target/
 *.iml
 *.class
+sitd/
+derby.log
 
 # Package Files #
 *.jar
