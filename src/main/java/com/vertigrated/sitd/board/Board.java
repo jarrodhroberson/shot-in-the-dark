@@ -62,7 +62,7 @@ public class Board
         if (end.x >= this.width || end.y >= this.height) { return false; }
         for (final Target t : this.targets) { if (target.intersects(t)) { return false; } }
         this.targets.add(target);
-        L.debug("Placed {}", target);
+        //L.debug("Placed {}", target);
         return true;
     }
 
