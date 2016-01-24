@@ -37,7 +37,7 @@ public class Shot
         {
             final JsonNode n = p.readValueAsTree();
             final ObjectCodec codec = p.getCodec();
-            final Coordinate c = codec.treeToValue(n.get("coordinates"), Coordinate.class);
+            final Coordinate c = codec.treeToValue(n.get("asSet"), Coordinate.class);
             final Date d = codec.treeToValue(n.get("placed"), Date.class);
             return new Shot.Builder().coordinate(c).on(d).build();
         }

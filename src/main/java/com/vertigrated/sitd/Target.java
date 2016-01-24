@@ -2,15 +2,16 @@ package com.vertigrated.sitd;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Range;
-import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.vertigrated.sitd.Orientation.HORIZONTAL;
 
 public class Target implements Comparable<Target>
 {
@@ -26,7 +27,7 @@ public class Target implements Comparable<Target>
     {
         @Override public int compare(@Nullable final Target left, @Nullable final Target right)
         {
-            return Ints.compare(checkNotNull(left).size(), checkNotNull(right).size());
+            return Longs.compare(checkNotNull(left).size(), checkNotNull(right).size());
         }
     };
 
@@ -34,36 +35,42 @@ public class Target implements Comparable<Target>
     {
         @Override public int compare(@Nullable final Target left, @Nullable final Target right)
         {
-            return Coordinate.NATURAL.compare(checkNotNull(left).coordinates.lowerEndpoint(), checkNotNull(right).coordinates.lowerEndpoint());
+            return checkNotNull(left).coordinates.compareTo(checkNotNull(right).coordinates);
         }
     };
 
     public final String name;
-    public final Range<Coordinate> coordinates;
-    public final Orientation orientation;
+    public final Coordinates coordinates;
 
-    public Target(@Nonnull final String name, @Nonnull final Range<Coordinate> coordinates)
+    public Target(@Nonnull final String name, @Nonnull final Coordinates coordinates)
     {
         this.name = name;
         this.coordinates = coordinates;
-        this.orientation = Coordinate.from(coordinates);
     }
+
+    public Orientation orientation() { return this.coordinates.orientation(); }
 
     public boolean intersects(@Nonnull final Target target)
     {
-        return this.coordinates.isConnected(target.coordinates);
+        final Set<Coordinate> coordinates = this.coordinates.asSet();
+        for (final Coordinate c : target.coordinates.asSet())
+        {
+            if (coordinates.contains(c)) { return true; }
+        }
+        return false;
     }
 
     public boolean contains(@Nonnull final Coordinate coordinate)
     {
-        return this.coordinates.contains(coordinate);
+        return Iterables.tryFind(this.coordinates.asSet(), new Predicate<Coordinate>() {
+            @Override public boolean apply(@Nullable final Coordinate input)
+            {
+                return coordinate.x.equals(checkNotNull(input).x) && coordinate.y.equals(input.y);
+            }
+        }).isPresent();
     }
 
-    public Integer size()
-    {
-        if (this.orientation.equals(HORIZONTAL)) { return this.coordinates.upperEndpoint().x - this.coordinates.lowerEndpoint().x; }
-        else { return this.coordinates.upperEndpoint().y - this.coordinates.lowerEndpoint().y; }
-    }
+    public long size() { return this.coordinates.size(); }
 
     @Override
     public int compareTo(@Nonnull final Target o)
@@ -77,13 +84,12 @@ public class Target implements Comparable<Target>
         if (o == null || getClass() != o.getClass()) { return false; }
         final Target target = (Target) o;
         return Objects.equal(name, target.name) &&
-               Objects.equal(coordinates, target.coordinates) &&
-               orientation == target.orientation;
+               Objects.equal(coordinates, target.coordinates);
     }
 
     @Override public int hashCode()
     {
-        return Objects.hashCode(name, coordinates, orientation);
+        return Objects.hashCode(name, coordinates);
     }
 
     @Override public String toString()
@@ -91,7 +97,6 @@ public class Target implements Comparable<Target>
         return MoreObjects.toStringHelper(this)
                           .add("name", name)
                           .add("coordinates", coordinates)
-                          .add("orientation", orientation)
                           .toString();
     }
 }

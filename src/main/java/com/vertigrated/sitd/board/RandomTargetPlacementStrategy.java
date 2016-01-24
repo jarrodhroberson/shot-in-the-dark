@@ -1,24 +1,26 @@
 package com.vertigrated.sitd.board;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Range;
+import com.google.common.collect.Iterables;
 import com.vertigrated.pattern.Strategy;
 import com.vertigrated.sitd.Coordinate;
+import com.vertigrated.sitd.Coordinates;
 import com.vertigrated.sitd.Orientation;
 import com.vertigrated.sitd.Target;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
 import static com.vertigrated.sitd.Orientation.HORIZONTAL;
-import static com.vertigrated.sitd.Orientation.VERTICAL;
 import static java.lang.String.format;
 
 public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target>>
 {
+    private static final Logger L = LoggerFactory.getLogger(RandomTargetPlacementStrategy.class);
+
     private final Random rnd;
     private final Integer minTargetSize;
     private final Integer maxTargetSize;
@@ -35,118 +37,60 @@ public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target
     @Override
     public Set<Target> apply(@Nonnull final Board board)
     {
-        final ImmutableSortedSet.Builder<Target> issb = ImmutableSortedSet.naturalOrder();
+        final Set<Coordinate> openSpaces = this.allCoordinates(board);
         for (int i = 0; i < targetCount; i++)
         {
             final Integer size = Math.min(rnd.nextInt(maxTargetSize) + minTargetSize, maxTargetSize);
             while (true)
             {
-                final Target t = this.randomlySelectedLocation(board, size);
+                final Orientation o = Orientation.values()[this.rnd.nextInt(2)];
+                final Target t = this.randomlySelectedLocation(board, size, i, o, openSpaces);
                 if (board.place(t))
                 {
-                    issb.add(t);
+                    openSpaces.removeAll(t.coordinates.asSet());
                     break;
                 }
             }
         }
-        return issb.build();
+        return board.targets;
     }
 
     @Nonnull
-    private Coordinate pickRandomCoordinate(@Nonnull final Set<Coordinate> coordinates)
+    private Coordinate pickRandomStartCoordinate(@Nonnull final Set<Coordinate> coordinates)
     {
-        final Iterator<Coordinate> it = coordinates.iterator();
-        for (int i = 0; i < new Random().nextInt(coordinates.size() - 1); i++)
+        return Iterables.get(coordinates, this.rnd.nextInt(coordinates.size() - 1));
+    }
+
+    private Set<Coordinate> allCoordinates(@Nonnull final Board b)
+    {
+        final Set<Coordinate> allCoordinates = new HashSet<>(b.width*b.height);
+        for (int y=0; y < b.height; y++)
         {
-            it.next();
+            for (int x = 0; x < b.width; x++)
+            {
+                allCoordinates.add(new Coordinate(x,y));
+            }
         }
-        return it.next();
+        return allCoordinates;
     }
 
     @Nonnull
-    private Set<Coordinate> findOpenSpaces(@Nonnull final Board b, @Nonnull final Integer size, @Nonnull final Orientation orientation)
+    private Target randomlySelectedLocation(@Nonnull final Board b, @Nonnull final Integer size, @Nonnull final Integer ordinal, @Nonnull final Orientation orientation, @Nonnull Set<Coordinate> openspaces)
     {
-        final ImmutableSet.Builder<Coordinate> ilb = ImmutableSet.builder();
+        final Coordinate start = this.pickRandomStartCoordinate(openspaces);
+        final Coordinate end;
         if (HORIZONTAL.equals(orientation))
         {
-            for (int c = 0; c <= b.height; c++)
-            {
-                for (int r = 0; r < b.width; r++)
-                {
-                    final Coordinate start = new Coordinate(r, c);
-                    final Coordinate end = new Coordinate(r + size - 1, c);
-                    final Range<Coordinate> range = Range.closed(start, end);
-                    final Set<Range<Coordinate>> taken = b.taken().asRanges();
-                    if (size < b.height - r - 1 && taken.isEmpty()) { ilb.add(start); }
-                    else
-                    {
-                        for (final Range<Coordinate> rc : taken)
-                        {
-                            if (size > b.height - r - 1 || rc.isConnected(range)) { break; }
-                            else { ilb.add(start); }
-                        }
-                    }
-                }
-            }
+
+            end = new Coordinate(start.x + size - 1, start.y);
         }
         else
         {
-            for (int r = 0; r < b.height; r++)
-            {
-                for (int c = 0; c < b.width; c++)
-                {
-                    final Coordinate start = new Coordinate(r, c);
-                    final Coordinate end = new Coordinate(r, c + size - 1);
-                    final Range<Coordinate> range = Range.closed(start, end);
-                    final Set<Range<Coordinate>> taken = b.taken().asRanges();
-                    if (size < b.width - c - 1 && taken.isEmpty()) { ilb.add(start); }
-                    else
-                    {
-                        for (final Range<Coordinate> rc : taken)
-                        {
-                            if (size > b.width - c - 1 || rc.isConnected(range)) { break; }
-                            else { ilb.add(start); }
-                        }
-                    }
-                }
-            }
+            assert start.y + size - 1 < b.height;
+            end = new Coordinate(start.x, start.y + size - 1);
         }
-        return ilb.build();
+        final Coordinates coordinates = new Coordinates(start, end);
+        return new Target(format("%d", ordinal), coordinates);
     }
 
-    @Nonnull
-    private Target randomlySelectedLocation(@Nonnull final Board b, @Nonnull final Integer size)
-    {
-        final Set<Coordinate> coordinates;
-        if (this.rnd.nextBoolean())
-        {
-            coordinates = this.findOpenSpaces(b, size, HORIZONTAL);
-            if (coordinates.isEmpty())
-            {
-                return this.randomlySelectedLocation(b, size);
-            }
-            else
-            {
-                final Coordinate start = this.pickRandomCoordinate(coordinates);
-                final Coordinate end = new Coordinate(start.x, start.y + size);
-                final Range<Coordinate> range = Range.closed(start, end);
-                return new Target(format("H%02d(%02d:%02d)", size, start.x, start.y), range);
-            }
-        }
-        else
-        {
-            coordinates = this.findOpenSpaces(b, size, VERTICAL);
-            if (coordinates.isEmpty())
-            {
-                return this.randomlySelectedLocation(b, size);
-            }
-            else
-            {
-                final Coordinate start = this.pickRandomCoordinate(coordinates);
-                final Coordinate end = new Coordinate(start.x + size, start.y);
-                final Range<Coordinate> range = Range.closed(start, end);
-                return new Target(format("V%02d(%02d:%02d)", size, start.x, start.y), range);
-            }
-        }
-    }
 }

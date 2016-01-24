@@ -8,61 +8,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
+import com.google.common.primitives.Ints;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.vertigrated.sitd.Orientation.HORIZONTAL;
-import static com.vertigrated.sitd.Orientation.VERTICAL;
-import static java.lang.String.format;
 
 @JsonSerialize(using = Coordinate.Serializer.class)
 @JsonDeserialize(using = Coordinate.Deserializer.class)
 public class Coordinate implements Comparable<Coordinate>
 {
-    public static Ordering<Coordinate> NATURAL_X = new Ordering<Coordinate>()
-    {
-        @Override public int compare(@Nullable final Coordinate coordinate, @Nullable final Coordinate t1)
-        {
-            return checkNotNull(coordinate).x.compareTo(checkNotNull(t1).x);
-        }
-    };
-    public static Ordering<Coordinate> NATURAL_Y = new Ordering<Coordinate>()
-    {
-        @Override public int compare(@Nullable final Coordinate coordinate, @Nullable final Coordinate t1)
-        {
-            return checkNotNull(coordinate).y.compareTo(checkNotNull(t1).y);
-        }
-    };
-    public static Ordering<Coordinate> NATURAL = NATURAL_X.compound(NATURAL_Y);
-
-    public static Set<Coordinate> coordinates(@Nonnull final Range<Coordinate> coordinateRange)
-    {
-        return ContiguousSet.create(coordinateRange, from(coordinateRange).equals(HORIZONTAL) ? new HorizontalDiscreteDomain(coordinateRange) : new VerticalDiscreteDomain(coordinateRange));
-    }
-
-    public static Orientation from(@Nonnull final Range<Coordinate> coordinateRange)
-    {
-        if (coordinateRange.lowerEndpoint().x.equals(coordinateRange.upperEndpoint().x))
-        {
-            return HORIZONTAL;
-        }
-        else if (coordinateRange.lowerEndpoint().y.equals(coordinateRange.upperEndpoint().y))
-        {
-            return VERTICAL;
-        }
-        else
-        {
-            throw new IllegalArgumentException(format("%s and %s do not represent a Horizontal or Vertical contigous range!", coordinateRange.lowerEndpoint(), coordinateRange.upperEndpoint()));
-        }
-    }
 
     public final Integer x;
     public final Integer y;
@@ -71,11 +28,6 @@ public class Coordinate implements Comparable<Coordinate>
     {
         this.x = x;
         this.y = y;
-    }
-
-    public Orientation orientation(@Nonnull final Coordinate start, @Nonnull final Coordinate end)
-    {
-        return start.x.equals(end.x) ? HORIZONTAL : VERTICAL;
     }
 
     @Override public boolean equals(final Object o)
@@ -89,7 +41,12 @@ public class Coordinate implements Comparable<Coordinate>
 
     @Override public int hashCode() { return Objects.hashCode(x, y); }
 
-    @Override public int compareTo(final Coordinate o) { return NATURAL.compare(this, o); }
+    @Override public int compareTo(@Nonnull final Coordinate o)
+    {
+        if (this.y.equals(o.y)) { return Ints.compare(this.x,o.x); }
+        else if (this.x.equals(o.x)) { return Ints.compare(this.y,o.y); }
+        else { return Ints.compare(this.y,o.y); }
+    }
 
     @Override public String toString()
     {
@@ -119,43 +76,7 @@ public class Coordinate implements Comparable<Coordinate>
         }
     }
 
-    public static class HorizontalDiscreteDomain extends DiscreteDomain<Coordinate>
-    {
-        private final Range<Coordinate> coordinateRange;
-
-        public HorizontalDiscreteDomain(@Nonnull final Range<Coordinate> coordinateRange)
-        {
-            this.coordinateRange = coordinateRange;
-        }
-
-        @Nullable
-        @Override
-        public Coordinate next(@Nonnull final Coordinate value)
-        {
-            if (value.x.equals(maxValue().x)) { return null; }
-            else {return new Coordinate(value.x + 1, value.y);}
-        }
-
-        @Nullable
-        @Override
-        public Coordinate previous(@Nonnull final Coordinate value)
-        {
-            if (value.y.equals(minValue().y)) { return null; }
-            else {return new Coordinate(value.x, value.y - 1);}
-        }
-
-        @Override public long distance(@Nonnull final Coordinate start, @Nonnull final Coordinate end) { return end.x - start.x; }
-
-        @Nonnull
-        @Override
-        public Coordinate minValue() { return coordinateRange.lowerEndpoint(); }
-
-        @Nonnull
-        @Override
-        public Coordinate maxValue() { return coordinateRange.upperEndpoint(); }
-    }
-
-    public static class VerticalDiscreteDomain extends DiscreteDomain<Coordinate>
+    static class VerticalDiscreteDomain extends DiscreteDomain<Coordinate>
     {
         private final Range<Coordinate> coordinateRange;
 
@@ -176,11 +97,47 @@ public class Coordinate implements Comparable<Coordinate>
         @Override
         public Coordinate previous(@Nonnull final Coordinate value)
         {
+            if (value.y.equals(minValue().y)) { return null; }
+            else {return new Coordinate(value.x, value.y - 1);}
+        }
+
+        @Override public long distance(@Nonnull final Coordinate start, @Nonnull final Coordinate end) { return end.y - start.y; }
+
+        @Nonnull
+        @Override
+        public Coordinate minValue() { return coordinateRange.lowerEndpoint(); }
+
+        @Nonnull
+        @Override
+        public Coordinate maxValue() { return coordinateRange.upperEndpoint(); }
+    }
+
+    static class HorizontalDiscreteDomain extends DiscreteDomain<Coordinate>
+    {
+        private final Range<Coordinate> coordinateRange;
+
+        public HorizontalDiscreteDomain(@Nonnull final Range<Coordinate> coordinateRange)
+        {
+            this.coordinateRange = coordinateRange;
+        }
+
+        @Nullable
+        @Override
+        public Coordinate next(@Nonnull final Coordinate value)
+        {
+            if (value.x.equals(maxValue().x)) { return null; }
+            else {return new Coordinate(value.x + 1, value.y);}
+        }
+
+        @Nullable
+        @Override
+        public Coordinate previous(@Nonnull final Coordinate value)
+        {
             if (value.x.equals(minValue().x)) { return null; }
             else {return new Coordinate(value.x + 1, value.y);}
         }
 
-        @Override public long distance(@Nonnull final Coordinate start, @Nonnull final Coordinate end) { return end.y - start.y; }
+        @Override public long distance(@Nonnull final Coordinate start, @Nonnull final Coordinate end) { return end.x - start.x; }
 
         @Nonnull
         @Override

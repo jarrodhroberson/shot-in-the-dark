@@ -1,7 +1,6 @@
 package com.vertigrated.sitd.io;
 
 import com.google.common.base.Throwables;
-import com.vertigrated.sitd.Target;
 import com.vertigrated.sitd.board.Board;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,30 +22,55 @@ public class AsciiBoardWriter implements BoardWriter
         this.osw = osw;
     }
 
+    private void write(@Nonnull final Integer i)
+    {
+        try
+        {
+            this.osw.write(String.valueOf(i));
+            this.osw.flush();
+        }
+        catch (final IOException e) { Throwables.propagate(e); }
+    }
+
     private void write(@Nonnull final Character c)
     {
-        try { this.osw.write(c); }
+        try
+        {
+            this.osw.write(c);
+            this.osw.flush();
+        }
         catch (final IOException e) { Throwables.propagate(e); }
     }
 
     private void write(@Nonnull final String s)
     {
-        try { this.osw.write(s); }
+        try
+        {
+            this.osw.write(s);
+            this.osw.flush();
+        }
         catch (final IOException e) { Throwables.propagate(e); }
     }
 
     @Override public void write(@Nonnull final Board b)
     {
-        for (int r = 0; r < b.height; r++)
+        this.write("  0123456789\n");
+        for (int row = 0; row < b.height; row++)
         {
-            for (int c = 0; c < b.width; c++)
+            this.write(row);
+            this.write('|');
+            for (int column = 0; column < b.width; column++)
             {
-                final boolean test = b.test(r, c);
-                final Target t = b.at(r,c);
-                L.debug("{}/{} : {}", r,c,t);
-                this.write(test ? 'X' : this.empty);
+                if (b.test(column, row))
+                {
+                    this.write(b.at(column, row).name);
+                }
+                else
+                {
+                    this.write(this.empty);
+                }
             }
-            this.write("\n");
+            this.write('\n');
         }
     }
 }

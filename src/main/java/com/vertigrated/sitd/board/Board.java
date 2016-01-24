@@ -1,23 +1,25 @@
 package com.vertigrated.sitd.board;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableRangeSet;
-import com.google.common.collect.RangeSet;
-import com.google.common.collect.Sets;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.*;
 import com.vertigrated.fluent.Build;
 import com.vertigrated.fluent.Dimension;
 import com.vertigrated.fluent.Targets;
 import com.vertigrated.pattern.Strategy;
 import com.vertigrated.sitd.Coordinate;
+import com.vertigrated.sitd.Coordinates;
 import com.vertigrated.sitd.Target;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.google.common.base.Charsets.UTF_8;
-import static com.google.common.base.Preconditions.checkElementIndex;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Board
 {
@@ -26,9 +28,7 @@ public class Board
     public final UUID id;
     public final Integer width;
     public final Integer height;
-    private final Random rnd = new Random();
-    private final Set<Target> targets;
-    private final Map<Coordinate, Target> targetByCoordinate;
+    final Set<Target> targets;
 
     public Board(@Nonnull final Integer dimension, @Nonnull final Set<Target> targets)
     {
@@ -40,81 +40,56 @@ public class Board
         this.width = width;
         this.height = height;
         this.targets = targets;
-        final ImmutableMap.Builder<Coordinate, Target> imb = ImmutableMap.builder();
-        for (final Target t : targets)
-        {
-            final Set<Coordinate> coordinates = Coordinate.coordinates(t.coordinates);
-            for (final Coordinate c : coordinates)
-            {
-                imb.put(c, t);
-            }
-        }
-        this.targetByCoordinate = imb.build();
-//        this.board = Iterables.mergeSorted(Iterables.transform(this.targets, new Function<Target, Iterable<Coordinate>>()
-//        {
-//            @Nullable @Override public Iterable<Coordinate> apply(@Nullable final Target input)
-//            {
-//                return new Iterable<Coordinate>()
-//                {
-//                    final Target target = checkNotNull(input);
-//
-//                    @Override public Iterator<Coordinate> iterator()
-//                    {
-//                        final DiscreteDomain<Coordinate> dd = target.orientation.equals(Orientation.HORIZONTAL) ? new Coordinate.HorizontalDiscreteDomain(target.coordinates) : new Coordinate.VerticalDiscreteDomain(target.coordinates);
-//                        return new Iterator<Coordinate>()
-//                        {
-//                            private Coordinate current = dd.minValue();
-//
-//                            @Override public boolean hasNext() { return dd.next(current).equals(dd.maxValue()); }
-//
-//                            @Override public Coordinate next()
-//                            {
-//                                if (!hasNext()) { return null; }
-//                                else { current = dd.next(current); }
-//                                return current;
-//                            }
-//                        };
-//                    }
-//                };
-//            }
-//        }), Coordinate.NATURAL);
-        final Iterator<Target> ti = targets.iterator();
-        for (int i = 0; ti.hasNext(); i++)
-        {
-            this.place(ti.next());
-        }
         this.id = UUID.nameUUIDFromBytes(this.toString().getBytes(UTF_8));
     }
 
-    final RangeSet<Coordinate> taken()
+    Set<Coordinates> taken()
     {
-        final ImmutableRangeSet.Builder<Coordinate> irsb = ImmutableRangeSet.builder();
-        for (final Target t : this.targets) { irsb.add(t.coordinates); }
-        return irsb.build();
+        return ImmutableSortedSet.copyOf(Iterables.transform(this.targets, new Function<Target, Coordinates>() {
+            @Nullable @Override public Coordinates apply(@Nullable final Target input)
+            {
+                return checkNotNull(input).coordinates;
+            }
+        }));
     }
 
     final boolean place(@Nonnull final Target target)
     {
+        final Coordinate end = target.coordinates.end();
+        if (end.x > this.width || end.y > this.height) { return false; }
         for (final Target t : this.targets)
         {
-            if (target.coordinates.isConnected(t.coordinates)) { return false; }
+            if (target.intersects(t)) { return false; }
         }
         this.targets.add(target);
         L.debug("Placed {}", target);
         return true;
     }
 
-    public Target at(@Nonnull final Integer row, @Nonnull final Integer column)
+    @Nullable
+    public Target at(@Nonnull final Integer x, @Nonnull final Integer y)
     {
-        final Coordinate key = new Coordinate(row, column);
-        return this.targetByCoordinate.get(key);
+        final Coordinate key = new Coordinate(x, y);
+        return Iterables.tryFind(this.targets, new Predicate<Target>() {
+            @Override public boolean apply(@Nullable final Target target)
+            {
+                return checkNotNull(target).contains(key);
+            }
+        }).orNull();
     }
 
-    public boolean test(@Nonnull final Integer row, @Nonnull final Integer column)
+    public boolean test(@Nonnull final Integer x, @Nonnull final Integer y)
     {
-        checkElementIndex(row, this.height, "Row");
-        checkElementIndex(column, this.width, "Column");
-        return this.targetByCoordinate.keySet().contains(new Coordinate(row, column));
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) { throw new IllegalArgumentException(); }
+        else
+        {
+            final Coordinate c = new Coordinate(x,y);
+            for (final Target t : this.targets)
+            {
+                if (t.contains(c)) { return true; }
+            }
+            return false;
+        }
     }
 
     interface BoardBuilder extends Dimension<Targets<Build<com.vertigrated.sitd.board.Board>>> {}
