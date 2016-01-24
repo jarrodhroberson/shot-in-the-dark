@@ -14,7 +14,7 @@ import java.util.Set;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.Is.is;
 
 public class BoardTest
@@ -36,8 +36,9 @@ public class BoardTest
     public void createSquareBoard() throws Exception
     {
         final Stopwatch sw = Stopwatch.createStarted();
-        final Board b = new Board.Builder().dimension(10000).targets(new RandomTargetPlacementStrategy(2, 10, 2500)).build();
-        assertThat(MILLISECONDS.convert(10, SECONDS), is(lessThan(sw.stop().elapsed(MILLISECONDS))));
+        final RandomTargetPlacementStrategy strategy = new RandomTargetPlacementStrategy(2, 8, 5);
+        final Board b = new Board.Builder().dimension(10).targets(strategy).build();
+        assertThat(MILLISECONDS.convert(10, SECONDS), is(greaterThan(sw.stop().elapsed(MILLISECONDS))));
         final OutputStreamWriter osw = new OutputStreamWriter(System.out);
         final BoardWriter bw = new AsciiBoardWriter(EMPTY, osw);
         bw.write(b);

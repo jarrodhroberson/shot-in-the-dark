@@ -2,7 +2,9 @@ package com.vertigrated.sitd.board;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.vertigrated.fluent.Build;
 import com.vertigrated.fluent.Dimension;
 import com.vertigrated.fluent.Targets;
@@ -45,7 +47,8 @@ public class Board
 
     Set<Coordinates> taken()
     {
-        return ImmutableSortedSet.copyOf(Iterables.transform(this.targets, new Function<Target, Coordinates>() {
+        return ImmutableSortedSet.copyOf(Iterables.transform(this.targets, new Function<Target, Coordinates>()
+        {
             @Nullable @Override public Coordinates apply(@Nullable final Target input)
             {
                 return checkNotNull(input).coordinates;
@@ -56,11 +59,8 @@ public class Board
     final boolean place(@Nonnull final Target target)
     {
         final Coordinate end = target.coordinates.end();
-        if (end.x > this.width || end.y > this.height) { return false; }
-        for (final Target t : this.targets)
-        {
-            if (target.intersects(t)) { return false; }
-        }
+        if (end.x >= this.width || end.y >= this.height) { return false; }
+        for (final Target t : this.targets) { if (target.intersects(t)) { return false; } }
         this.targets.add(target);
         L.debug("Placed {}", target);
         return true;
@@ -70,7 +70,8 @@ public class Board
     public Target at(@Nonnull final Integer x, @Nonnull final Integer y)
     {
         final Coordinate key = new Coordinate(x, y);
-        return Iterables.tryFind(this.targets, new Predicate<Target>() {
+        return Iterables.tryFind(this.targets, new Predicate<Target>()
+        {
             @Override public boolean apply(@Nullable final Target target)
             {
                 return checkNotNull(target).contains(key);
@@ -83,7 +84,7 @@ public class Board
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) { throw new IllegalArgumentException(); }
         else
         {
-            final Coordinate c = new Coordinate(x,y);
+            final Coordinate c = new Coordinate(x, y);
             for (final Target t : this.targets)
             {
                 if (t.contains(c)) { return true; }
