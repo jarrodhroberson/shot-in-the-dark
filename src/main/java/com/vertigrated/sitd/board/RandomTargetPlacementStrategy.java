@@ -86,7 +86,6 @@ public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target
         }
         else
         {
-            assert start.y + size - 1 < b.height;
             end = new Coordinate(start.x, start.y + size - 1);
         }
         final Coordinates coordinates = new Coordinates(start, end);

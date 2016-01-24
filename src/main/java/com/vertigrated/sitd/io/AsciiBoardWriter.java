@@ -63,7 +63,7 @@ public class AsciiBoardWriter implements BoardWriter
             {
                 if (b.test(column, row))
                 {
-                    this.write(b.at(column, row).name);
+                    this.write('@');
                 }
                 else
                 {
