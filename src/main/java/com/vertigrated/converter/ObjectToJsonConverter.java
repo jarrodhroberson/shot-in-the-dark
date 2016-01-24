@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.IOException;
 
-public class ObjectToJsonConverter<T> extends Converter<T,String>
+public class ObjectToJsonConverter<T> extends Converter<T, String>
 {
     private final ObjectMapper om;
     private final Class<T> cls;
@@ -25,26 +25,14 @@ public class ObjectToJsonConverter<T> extends Converter<T,String>
     @Override
     protected String doForward(@Nonnull final T o)
     {
-        try
-        {
-            return om.writeValueAsString(o);
-        }
-        catch (final JsonProcessingException e)
-        {
-            throw new RuntimeException(e);
-        }
+        try { return om.writeValueAsString(o); }
+        catch (final JsonProcessingException e) { throw new RuntimeException(e); }
     }
 
     @Override
     protected T doBackward(@Nonnull final String s)
     {
-        try
-        {
-            return this.om.readValue(s,this.cls);
-        }
-        catch (final IOException e)
-        {
-            throw new RuntimeException(e);
-        }
+        try { return this.om.readValue(s, this.cls); }
+        catch (final IOException e) { throw new RuntimeException(e); }
     }
 }

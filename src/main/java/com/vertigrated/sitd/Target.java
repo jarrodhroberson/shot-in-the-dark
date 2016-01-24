@@ -1,18 +1,31 @@
 package com.vertigrated.sitd;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Longs;
+import com.vertigrated.fluent.Build;
+import com.vertigrated.fluent.Name;
+import com.vertigrated.jackson.JsonNodeToObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@JsonSerialize(using = Target.Serializer.class)
+@JsonDeserialize(using = Target.Deserializer.class)
 public class Target implements Comparable<Target>
 {
     public static final Ordering<Target> NAME = new Ordering<Target>()
@@ -62,7 +75,8 @@ public class Target implements Comparable<Target>
 
     public boolean contains(@Nonnull final Coordinate coordinate)
     {
-        return Iterables.tryFind(this.coordinates.asSet(), new Predicate<Coordinate>() {
+        return Iterables.tryFind(this.coordinates.asSet(), new Predicate<Coordinate>()
+        {
             @Override public boolean apply(@Nullable final Coordinate input)
             {
                 return coordinate.x.equals(checkNotNull(input).x) && coordinate.y.equals(input.y);
@@ -98,5 +112,56 @@ public class Target implements Comparable<Target>
                           .add("name", name)
                           .add("coordinates", coordinates)
                           .toString();
+    }
+
+    public static class Builder implements Name<com.vertigrated.fluent.Coordinates<Build<Target>>>
+    {
+        @Override public com.vertigrated.fluent.Coordinates<Build<Target>> name(@Nonnull final String name)
+        {
+            return new com.vertigrated.fluent.Coordinates<Build<Target>>()
+            {
+                @Override public Build<Target> coordinates(@Nonnull final Coordinates coordinates)
+                {
+                    return new Build<Target>()
+                    {
+                        @Override public Target build()
+                        {
+                            return new Target(name, coordinates);
+                        }
+                    };
+                }
+            };
+        }
+    }
+
+    public static class Serializer extends JsonSerializer<Target>
+    {
+
+        @Override public void serialize(final Target value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
+        {
+            gen.writeStartObject();
+            gen.writeStringField("name", value.name);
+            ;
+            gen.writeObjectField("coordinates", value.coordinates);
+            gen.writeEndObject();
+        }
+    }
+
+    public static class Deserializer extends JsonDeserializer<Target>
+    {
+        @Override public Target deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
+        {
+            final JsonNode n = p.readValueAsTree();
+            return new Builder().name(new JsonNodeToObject<String>(p.getCodec()).apply(n.get("name")))
+                                .coordinates(new Function<JsonNode, Coordinates>()
+                                {
+                                    @Nonnull @Override public Coordinates apply(@Nullable final JsonNode input)
+                                    {
+                                        try { return p.getCodec().treeToValue(input, Coordinates.class); }
+                                        catch (JsonProcessingException e) { throw new RuntimeException(e); }
+                                    }
+                                }.apply(n.get("coordinates")))
+                                .build();
+        }
     }
 }

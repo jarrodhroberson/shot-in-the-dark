@@ -1,6 +1,14 @@
 package com.vertigrated.sitd.board;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Function;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
@@ -17,12 +25,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
 
 import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@JsonSerialize(using = Board.Serializer.class)
+@JsonDeserialize(using = Board.Deserializer.class)
 public class Board
 {
     private static final Logger L = LoggerFactory.getLogger(Board.class);
@@ -32,16 +43,20 @@ public class Board
     public final Integer height;
     final Set<Target> targets;
 
-    public Board(@Nonnull final Integer dimension, @Nonnull final Set<Target> targets)
+    Board(@Nonnull final Integer dimension, @Nonnull final Set<Target> targets)
     {
         this(dimension, dimension, targets);
     }
 
-    public Board(@Nonnull final Integer width, @Nonnull final Integer height, @Nonnull final Set<Target> targets)
+    Board(@Nonnull final Integer width, @Nonnull final Integer height, @Nonnull final Set<Target> targets)
     {
         this.width = width;
         this.height = height;
-        this.targets = targets;
+        this.targets = Sets.newTreeSet();
+        for (final Target t : targets)
+        {
+            this.place(t);
+        }
         this.id = UUID.nameUUIDFromBytes(this.toString().getBytes(UTF_8));
     }
 
@@ -62,7 +77,6 @@ public class Board
         if (end.x >= this.width || end.y >= this.height) { return false; }
         for (final Target t : this.targets) { if (target.intersects(t)) { return false; } }
         this.targets.add(target);
-        //L.debug("Placed {}", target);
         return true;
     }
 
@@ -93,9 +107,30 @@ public class Board
         }
     }
 
-    interface BoardBuilder extends Dimension<Targets<Build<com.vertigrated.sitd.board.Board>>> {}
+    @Override public boolean equals(final Object o)
+    {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        final Board board = (Board) o;
+        return this.toString().equals(board.toString());
+    }
 
-    public static class Builder implements BoardBuilder
+    @Override public int hashCode()
+    {
+        return Objects.hashCode(id, width, height, targets);
+    }
+
+    @Override public String toString()
+    {
+        return MoreObjects.toStringHelper(this)
+                          .add("id", id)
+                          .add("width", width)
+                          .add("height", height)
+                          .add("targets", targets)
+                          .toString();
+    }
+
+    public static class Builder implements Dimension<Targets<Build<com.vertigrated.sitd.board.Board>>>
     {
         @Override public Targets<Build<Board>> dimension(@Nonnull final Integer width, @Nonnull final Integer height)
         {
@@ -122,6 +157,47 @@ public class Board
         @Override public Targets<Build<Board>> dimension(@Nonnull final Integer side)
         {
             return this.dimension(side, side);
+        }
+    }
+
+    public static class Serializer extends JsonSerializer<Board>
+    {
+        @Override public void serialize(final Board value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
+        {
+            gen.writeStartObject();
+            gen.writeObjectField("id", value.id);
+            gen.writeNumberField("width", value.width);
+            gen.writeNumberField("height", value.height);
+            gen.writeArrayFieldStart("targets");
+            for (final Target t : value.targets) { gen.writeObject(t); }
+            gen.writeEndArray();
+            gen.writeEndObject();
+        }
+    }
+
+    public static class Deserializer extends JsonDeserializer<Board>
+    {
+        @Override public Board deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
+        {
+            final JsonNode n = p.readValueAsTree();
+            return new Builder().dimension(n.get("width").asInt(), n.get("height").asInt())
+                                .targets(new Function<JsonNode, Set<Target>>()
+                                {
+                                    @Nonnull @Override public Set<Target> apply(@Nullable final JsonNode input)
+                                    {
+                                        final ImmutableSortedSet.Builder<Target> issb = ImmutableSortedSet.naturalOrder();
+                                        if (checkNotNull(input).isArray())
+                                        {
+                                            for (final JsonNode jn : input)
+                                            {
+                                                try { issb.add(p.getCodec().treeToValue(jn, Target.class)); }
+                                                catch (JsonProcessingException e) { throw new RuntimeException(e); }
+
+                                            }
+                                        }
+                                        return issb.build();
+                                    }
+                                }.apply(n.get("targets"))).build();
         }
     }
 

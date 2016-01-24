@@ -12,6 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <package.version.package>com.vertigrated.sitd</package.version.package>
         <dropwizard.version>0.9.1</dropwizard.version>
         <jackson.version>2.6.4</jackson.version>
         <jooq.version>3.7.2</jooq.version>
@@ -90,60 +91,57 @@
     </dependencies>
 
     <build>
+
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.jooq</groupId>-->
-                <!--<artifactId>jooq-codegen-maven</artifactId>-->
-                <!--<version>${jooq.version}</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>derby</id>-->
-                        <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<jdbc>-->
-                                <!--<driver>org.apache.derby.jdbc.EmbeddedDriver</driver>-->
-                                <!--<url>jdbc:derby:sitd;create=true</url>-->
-                                <!--<inputSchema>sitd</inputSchema>-->
-                                <!--<user>admin</user>-->
-                                <!--<password>1qaz2wsx</password>-->
-                            <!--</jdbc>-->
-                            <!--<generator>-->
-                                <!--<name>org.jooq.util.DefaultGenerator</name>-->
-                                <!--<database>-->
-                                    <!--<name>org.jooq.util.derby.DerbyDatabase</name>-->
-                                    <!--<includes>.*</includes>-->
-                                    <!--<excludes/>-->
-                                <!--</database>-->
-                                <!--<generate>-->
-                                    <!--<relations>true</relations>-->
-                                    <!--<deprecated>false</deprecated>-->
-                                    <!--<instanceFields>false</instanceFields>-->
-                                <!--</generate>-->
-                                <!--<target>-->
-                                    <!--<packageName>com.vertigrated.sitd.derby</packageName>-->
-                                    <!--<directory>target/generated-sources/jooq-derby</directory>-->
-                                <!--</target>-->
-                            <!--</generator>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<dependencies>-->
-                    <!--<dependency>-->
-                        <!--<groupId>org.apache.derby</groupId>-->
-                        <!--<artifactId>derby</artifactId>-->
-                        <!--<version>${derby.version}</version>-->
-                    <!--</dependency>-->
-                <!--</dependencies>-->
-            <!--</plugin>-->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>copy-version-properties</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/generated-sources/version-package/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/main/version-package/</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>**/*.java</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.10</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>target/generated-sources/version-package</sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

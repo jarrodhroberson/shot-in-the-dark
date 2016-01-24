@@ -1,16 +1,28 @@
 package com.vertigrated.sitd;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.guava.deser.RangeDeserializer;
+import com.fasterxml.jackson.datatype.guava.ser.RangeSerializer;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Range;
+import com.vertigrated.fluent.Build;
+import com.vertigrated.fluent.End;
+import com.vertigrated.fluent.Start;
 import com.vertigrated.sitd.Coordinate.HorizontalDiscreteDomain;
 import com.vertigrated.sitd.Coordinate.VerticalDiscreteDomain;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +30,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
+@JsonSerialize(using = Coordinates.Serializer.class)
+@JsonDeserialize(using = Coordinates.Deserializer.class)
 public class Coordinates implements Iterable<Coordinate>, Comparable<Coordinates>
 {
     public static Ordering<Coordinate> NATURAL_X = new Ordering<Coordinate>()
@@ -44,6 +58,8 @@ public class Coordinates implements Iterable<Coordinate>, Comparable<Coordinates
         else { throw new IllegalArgumentException(format("%s and %s do not represent a Horizontal or Vertical contigous range!", left, right)); }
     }
 
+    @JsonSerialize(using = RangeSerializer.class)
+    @JsonDeserialize(using = RangeDeserializer.class)
     private final Range<Coordinate> range;
     private final Orientation orientation;
     private final DiscreteDomain<Coordinate> discreteDomain;
@@ -105,13 +121,12 @@ public class Coordinates implements Iterable<Coordinate>, Comparable<Coordinates
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
         final Coordinates that = (Coordinates) o;
-        return Objects.equal(range, that.range) &&
-               orientation == that.orientation;
+        return this.toString().equals(that.toString());
     }
 
     @Override public int hashCode()
     {
-        return Objects.hashCode(range, orientation);
+        return Objects.hashCode(range, orientation, discreteDomain);
     }
 
     @Override public String toString()
@@ -120,5 +135,47 @@ public class Coordinates implements Iterable<Coordinate>, Comparable<Coordinates
                           .add("range", range)
                           .add("orientation", orientation)
                           .toString();
+    }
+
+    public static class Serializer extends JsonSerializer<Coordinates>
+    {
+        @Override public void serialize(final Coordinates value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
+        {
+            gen.writeStartObject();
+            gen.writeObjectField("start", value.range.lowerEndpoint());
+            gen.writeObjectField("end", value.range.upperEndpoint());
+            gen.writeEndObject();
+        }
+    }
+
+    public static class Builder implements Start<End<Build<Coordinates>, Coordinate>, Coordinate>
+    {
+        @Override public End<Build<Coordinates>, Coordinate> start(@Nonnull final Coordinate start)
+        {
+            return new End<Build<Coordinates>, Coordinate>()
+            {
+                @Override public Build<Coordinates> end(@Nonnull final Coordinate end)
+                {
+                    return new Build<Coordinates>()
+                    {
+                        @Override public Coordinates build()
+                        {
+                            return new Coordinates(start, end);
+                        }
+                    };
+                }
+            };
+        }
+    }
+
+    public static class Deserializer extends JsonDeserializer<Coordinates>
+    {
+        @Override public Coordinates deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
+        {
+            final JsonNode n = p.readValueAsTree();
+            return new Builder().start(p.getCodec().treeToValue(n.get("start"), Coordinate.class))
+                                .end(p.getCodec().treeToValue(n.get("end"), Coordinate.class))
+                                .build();
+        }
     }
 }

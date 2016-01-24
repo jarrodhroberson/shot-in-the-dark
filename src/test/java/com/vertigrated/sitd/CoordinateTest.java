@@ -1,5 +1,7 @@
 package com.vertigrated.sitd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSortedSet;
 import org.junit.Test;
 
@@ -75,5 +77,24 @@ public class CoordinateTest
         assertThat(vr, is(greaterThan(vl)));
         assertThat(vr, is(equalTo(vr)));
         assertThat(vl, is(equalTo(vl)));
+    }
+
+    @Test
+    public void testSerializer() throws JsonProcessingException
+    {
+        final ObjectMapper om = new ObjectMapper();
+        final Coordinate c = new Coordinate(0,0);
+        final String json = om.writeValueAsString(c);
+        assertThat("{\"x\":0,\"y\":0}", is(equalTo(json)));
+    }
+
+    @Test
+    public void TestDeserializer() throws Exception
+    {
+        final ObjectMapper om = new ObjectMapper();
+        final Coordinate c1 = new Coordinate(0, 0);
+        final String json = om.writeValueAsString(c1);
+        final Coordinate c2 = om.readValue(json,Coordinate.class);
+        assertThat(c1, is(equalTo(c2)));
     }
 }
