@@ -69,6 +69,7 @@ public class Coordinate implements Comparable<Coordinate>
 
     static class Deserializer extends JsonDeserializer<Coordinate>
     {
+        @Nonnull
         @Override public Coordinate deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
         {
             final JsonNode n = p.readValueAsTree();
