@@ -13,6 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <package.version.package>com.vertigrated.sitd</package.version.package>
+        <guice.verison>4.0</guice.verison>
         <dropwizard.version>0.9.1</dropwizard.version>
         <jackson.version>2.6.4</jackson.version>
         <jooq.version>3.7.2</jooq.version>
@@ -29,7 +30,17 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>4.0</version>
+            <version>${guice.verison}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-testlib</artifactId>
+            <version>${guice.verison}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject.extensions</groupId>
+            <artifactId>guice-assistedinject</artifactId>
+            <version>${guice.verison}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>

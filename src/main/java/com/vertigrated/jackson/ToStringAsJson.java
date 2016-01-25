@@ -12,17 +12,17 @@ import javax.annotation.Nonnull;
 @Singleton
 public class ToStringAsJson implements MethodInterceptor
 {
-    private final ObjectMapper om;
+    private final Provider<ObjectMapper> omp;
 
     @Inject
     public ToStringAsJson(@Nonnull final Provider<ObjectMapper> objectMapperProvider)
     {
-        this.om = objectMapperProvider.get();
+        this.omp = objectMapperProvider;
     }
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable
     {
-        return this.om.writeValueAsString(invocation.getThis());
+        return this.omp.get().writeValueAsString(invocation.getThis());
     }
 }
