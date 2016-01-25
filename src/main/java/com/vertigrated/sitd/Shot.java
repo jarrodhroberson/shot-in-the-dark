@@ -37,13 +37,15 @@ public class Shot
         {
             final JsonNode n = p.readValueAsTree();
             final ObjectCodec codec = p.getCodec();
-            final Coordinate c = codec.treeToValue(n.get("asSet"), Coordinate.class);
+            final Coordinate c = codec.treeToValue(n.get("coordinate"), Coordinate.class);
             final Date d = codec.treeToValue(n.get("placed"), Date.class);
             return new Shot.Builder().coordinate(c).on(d).build();
         }
     }
 
+    @Nonnull
     public final Coordinate coordinate;
+    @Nonnull
     public final Date placed;
 
     private Shot(@Nonnull final Integer x, @Nonnull final Integer y, @Nonnull final Date placed)
@@ -81,18 +83,20 @@ public class Shot
                           .toString();
     }
 
-    interface ShotBuilder extends com.vertigrated.fluent.Coordinate<On<Build<Shot>,Date>,Integer> {}
-
-    public static class Builder implements ShotBuilder
+    public static class Builder implements com.vertigrated.fluent.Coordinate<On<Build<Shot>, Date>, Integer>
     {
+        @Nonnull
         @Override public On<Build<Shot>, Date> coordinate(@Nonnull final Coordinate coordinate)
         {
             return new On<Build<Shot>, Date>()
             {
+                @Nonnull
                 @Override public Build<Shot> on(@Nonnull final Date on)
                 {
+
                     return new Build<Shot>()
                     {
+                        @Nonnull
                         @Override public Shot build()
                         {
                             return new Shot(coordinate, on);
@@ -102,6 +106,7 @@ public class Shot
             };
         }
 
+        @Nonnull
         @Override public On<Build<Shot>, Date> coordinate(@Nonnull final Integer x, @Nonnull final Integer y)
         {
             return this.coordinate(new Coordinate(x,y));

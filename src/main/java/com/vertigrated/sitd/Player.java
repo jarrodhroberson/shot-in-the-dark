@@ -25,7 +25,14 @@ public class Player
         this.id = id;
     }
 
-    @Override public boolean equals(final Object o)
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public boolean equals(final Object o)
     {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
@@ -33,12 +40,8 @@ public class Player
         return Objects.equal(id, player.id);
     }
 
-    @Override public int hashCode()
-    {
-        return Objects.hashCode(id);
-    }
-
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         return MoreObjects.toStringHelper(this)
                           .add("id", id)
@@ -49,11 +52,14 @@ public class Player
 
     public static class Builder implements PlayerBuilder
     {
-        @Override public Build<Player> player(@Nonnull final UUID player)
+        @Nonnull
+        @Override
+        public Build<Player> player(@Nonnull final UUID player)
         {
             return new Build<Player>()
             {
-                @Override public Player build()
+                @Override
+                public Player build()
                 {
                     return new Player(player);
                 }
@@ -63,7 +69,8 @@ public class Player
 
     static class Serializer extends JsonSerializer<Player>
     {
-        @Override public void serialize(final Player value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
+        @Override
+        public void serialize(final Player value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
         {
             gen.writeStartObject();
             gen.writeObjectField("id", value.id);
@@ -73,7 +80,9 @@ public class Player
 
     static class Deserializer extends JsonDeserializer<Player>
     {
-        @Override public Player deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
+        @Nonnull
+        @Override
+        public Player deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
         {
             final JsonNode n = p.readValueAsTree();
             return new Player.Builder().player(p.getCodec().treeToValue(n.get("id"), UUID.class)).build();

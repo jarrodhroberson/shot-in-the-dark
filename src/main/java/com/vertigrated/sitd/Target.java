@@ -6,16 +6,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Longs;
+import com.google.inject.Inject;
+import com.vertigrated.converter.JsonNodeToObject;
 import com.vertigrated.fluent.Build;
 import com.vertigrated.fluent.Name;
-import com.vertigrated.jackson.JsonNodeToObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -116,6 +116,7 @@ public class Target implements Comparable<Target>
 
     public static class Builder implements Name<com.vertigrated.fluent.Coordinates<Build<Target>>>
     {
+        @Nonnull
         @Override public com.vertigrated.fluent.Coordinates<Build<Target>> name(@Nonnull final String name)
         {
             return new com.vertigrated.fluent.Coordinates<Build<Target>>()
@@ -141,7 +142,6 @@ public class Target implements Comparable<Target>
         {
             gen.writeStartObject();
             gen.writeStringField("name", value.name);
-            ;
             gen.writeObjectField("coordinates", value.coordinates);
             gen.writeEndObject();
         }
@@ -149,18 +149,21 @@ public class Target implements Comparable<Target>
 
     public static class Deserializer extends JsonDeserializer<Target>
     {
+        @Nonnull
+        private final JsonNodeToObject<Coordinates> converter;
+
+        @Inject
+        Deserializer(@Nonnull final JsonNodeToObject<Coordinates> converter)
+        {
+            this.converter = converter;
+        }
+
+        @Nonnull
         @Override public Target deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
         {
             final JsonNode n = p.readValueAsTree();
-            return new Builder().name(new JsonNodeToObject<String>(p.getCodec()).apply(n.get("name")))
-                                .coordinates(new Function<JsonNode, Coordinates>()
-                                {
-                                    @Nonnull @Override public Coordinates apply(@Nullable final JsonNode input)
-                                    {
-                                        try { return p.getCodec().treeToValue(input, Coordinates.class); }
-                                        catch (JsonProcessingException e) { throw new RuntimeException(e); }
-                                    }
-                                }.apply(n.get("coordinates")))
+            return new Builder().name(n.get("name").asText())
+                                .coordinates(this.converter.convert(n.get("coordinates")))
                                 .build();
         }
     }

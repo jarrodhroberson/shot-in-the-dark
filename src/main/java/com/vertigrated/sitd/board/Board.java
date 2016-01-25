@@ -60,17 +60,6 @@ public class Board
         this.id = UUID.nameUUIDFromBytes(this.toString().getBytes(UTF_8));
     }
 
-    Set<Coordinates> taken()
-    {
-        return ImmutableSortedSet.copyOf(Iterables.transform(this.targets, new Function<Target, Coordinates>()
-        {
-            @Nullable @Override public Coordinates apply(@Nullable final Target input)
-            {
-                return checkNotNull(input).coordinates;
-            }
-        }));
-    }
-
     final boolean place(@Nonnull final Target target)
     {
         final Coordinate end = target.coordinates.end();
@@ -80,13 +69,27 @@ public class Board
         return true;
     }
 
+    Set<Coordinates> taken()
+    {
+        return ImmutableSortedSet.copyOf(Iterables.transform(this.targets, new Function<Target, Coordinates>()
+        {
+            @Nullable
+            @Override
+            public Coordinates apply(@Nullable final Target input)
+            {
+                return checkNotNull(input).coordinates;
+            }
+        }));
+    }
+
     @Nullable
     public Target at(@Nonnull final Integer x, @Nonnull final Integer y)
     {
         final Coordinate key = new Coordinate(x, y);
         return Iterables.tryFind(this.targets, new Predicate<Target>()
         {
-            @Override public boolean apply(@Nullable final Target target)
+            @Override
+            public boolean apply(@Nullable final Target target)
             {
                 return checkNotNull(target).contains(key);
             }
@@ -107,7 +110,14 @@ public class Board
         }
     }
 
-    @Override public boolean equals(final Object o)
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(id, width, height, targets);
+    }
+
+    @Override
+    public boolean equals(final Object o)
     {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
@@ -115,12 +125,8 @@ public class Board
         return this.toString().equals(board.toString());
     }
 
-    @Override public int hashCode()
-    {
-        return Objects.hashCode(id, width, height, targets);
-    }
-
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         return MoreObjects.toStringHelper(this)
                           .add("id", id)
@@ -130,31 +136,40 @@ public class Board
                           .toString();
     }
 
-    public static class Builder implements Dimension<Targets<Build<com.vertigrated.sitd.board.Board>>>
+    public static class Builder implements Dimension<Targets<Build<com.vertigrated.sitd.board.Board>>, Integer>
     {
-        @Override public Targets<Build<Board>> dimension(@Nonnull final Integer width, @Nonnull final Integer height)
+        @Nonnull
+        @Override
+        public Targets<Build<Board>> dimension(@Nonnull final Integer width, @Nonnull final Integer height)
         {
             return new Targets<Build<Board>>()
             {
-                @Override public Build<Board> targets(@Nonnull final Set<Target> targets)
+                @Nonnull
+                @Override
+                public Build<Board> targets(@Nonnull final Set<Target> targets)
                 {
                     return new Build<Board>()
                     {
-                        @Override public Board build()
+                        @Override
+                        public Board build()
                         {
                             return new Board(width, height, targets);
                         }
                     };
                 }
 
-                @Override public Build<Board> targets(@Nonnull final Strategy<Board, Set<Target>> strategy)
+                @Nonnull
+                @Override
+                public Build<Board> targets(@Nonnull final Strategy<Board, Set<Target>> strategy)
                 {
                     return this.targets(strategy.apply(new Board(width, height, Sets.<Target>newTreeSet())));
                 }
             };
         }
 
-        @Override public Targets<Build<Board>> dimension(@Nonnull final Integer side)
+        @Nonnull
+        @Override
+        public Targets<Build<Board>> dimension(@Nonnull final Integer side)
         {
             return this.dimension(side, side);
         }
@@ -162,7 +177,8 @@ public class Board
 
     public static class Serializer extends JsonSerializer<Board>
     {
-        @Override public void serialize(final Board value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
+        @Override
+        public void serialize(final Board value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
         {
             gen.writeStartObject();
             gen.writeObjectField("id", value.id);
@@ -177,13 +193,17 @@ public class Board
 
     public static class Deserializer extends JsonDeserializer<Board>
     {
-        @Override public Board deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
+        @Nonnull
+        @Override
+        public Board deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
         {
             final JsonNode n = p.readValueAsTree();
             return new Builder().dimension(n.get("width").asInt(), n.get("height").asInt())
                                 .targets(new Function<JsonNode, Set<Target>>()
                                 {
-                                    @Nonnull @Override public Set<Target> apply(@Nullable final JsonNode input)
+                                    @Nonnull
+                                    @Override
+                                    public Set<Target> apply(@Nullable final JsonNode input)
                                     {
                                         final ImmutableSortedSet.Builder<Target> issb = ImmutableSortedSet.naturalOrder();
                                         if (checkNotNull(input).isArray())

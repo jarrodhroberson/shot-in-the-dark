@@ -9,19 +9,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public enum Orientation
 {
-    HORIZONTAL, VERTICAL;
-
-    public static Ordering<Orientation> HV = new Ordering<Orientation>() {
-        @Override public int compare(@Nullable final Orientation left, @Nullable final Orientation right)
+    HORIZONTAL(new Ordering<Orientation>()
+    {
+        @Override
+        public int compare(@Nullable final Orientation left, @Nullable final Orientation right)
         {
             return Ints.compare(checkNotNull(left).ordinal(), checkNotNull(right).ordinal());
         }
-    };
-    public static Ordering<Orientation> VH = new Ordering<Orientation>()
+    }),
+    VERTICAL(new Ordering<Orientation>()
     {
-        @Override public int compare(@Nullable final Orientation left, @Nullable final Orientation right)
+        @Override
+        public int compare(@Nullable final Orientation left, @Nullable final Orientation right)
         {
             return Ints.compare(checkNotNull(right).ordinal(), checkNotNull(left).ordinal());
         }
-    };
+    });
+
+    public final Ordering<Orientation> ordering;
+
+    private Orientation(final Ordering<Orientation> ordering)
+    {
+        this.ordering = ordering;
+    }
 }

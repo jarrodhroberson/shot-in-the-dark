@@ -9,14 +9,14 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.IOException;
 
-public class ObjectToJsonConverter<T> extends Converter<T, String>
+public class ObjectToJson<T> extends Converter<T, String>
 {
     private final ObjectMapper om;
     private final Class<T> cls;
 
     @Inject
     @SuppressWarnings("unchecked")
-    ObjectToJsonConverter(@Nonnull final ObjectMapper om)
+    ObjectToJson(@Nonnull final ObjectMapper om)
     {
         this.om = om;
         this.cls = (Class<T>) new TypeToken<T>(getClass()) {}.getRawType();
