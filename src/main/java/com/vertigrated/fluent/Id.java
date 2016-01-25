@@ -2,8 +2,8 @@ package com.vertigrated.fluent;
 
 import javax.annotation.Nonnull;
 
-public interface Start<T,S>
+public interface Id<T,I>
 {
     @Nonnull
-    public T start(@Nonnull final S start);
+    public T id(@Nonnull final I id);
 }

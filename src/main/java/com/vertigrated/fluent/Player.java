@@ -2,7 +2,8 @@ package com.vertigrated.fluent;
 
 import javax.annotation.Nonnull;
 
-public interface Player<T,I>
+public interface Player<T,P>
 {
-    public T player(@Nonnull final I player);
+    @Nonnull
+    public T player(@Nonnull final P player);
 }

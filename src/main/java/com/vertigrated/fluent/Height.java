@@ -2,7 +2,8 @@ package com.vertigrated.fluent;
 
 import javax.annotation.Nonnull;
 
-public interface Height<T>
+public interface Height<T, N extends Number>
 {
-    public T height(@Nonnull final Integer height);
+    @Nonnull
+    public T height(@Nonnull final N height);
 }

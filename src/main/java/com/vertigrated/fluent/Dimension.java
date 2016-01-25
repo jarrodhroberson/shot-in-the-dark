@@ -2,8 +2,11 @@ package com.vertigrated.fluent;
 
 import javax.annotation.Nonnull;
 
-public interface Dimension<T>
+public interface Dimension<T,N extends Number>
 {
-    public T dimension(@Nonnull final Integer width, @Nonnull final Integer height);
-    public T dimension(@Nonnull final Integer side);
+    @Nonnull
+    public T dimension(@Nonnull final N width, @Nonnull final N height);
+
+    @Nonnull
+    public T dimension(@Nonnull final N side);
 }

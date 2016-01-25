@@ -2,7 +2,8 @@ package com.vertigrated.fluent;
 
 import javax.annotation.Nonnull;
 
-public interface Width<T>
+public interface Width<T,N extends Number>
 {
-    public T width(@Nonnull final Integer width);
+    @Nonnull
+    public T width(@Nonnull final N width);
 }

@@ -2,7 +2,8 @@ package com.vertigrated.fluent;
 
 import javax.annotation.Nonnull;
 
-public interface End<T,C>
+public interface End<T,E>
 {
-    public T end(@Nonnull final C end);
+    @Nonnull
+    public T end(@Nonnull final E end);
 }
