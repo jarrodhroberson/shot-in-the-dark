@@ -7,10 +7,10 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.vertigrated.fluent.Build;
 import com.vertigrated.fluent.On;
+import com.vertigrated.jackson.ToJson;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -74,14 +74,9 @@ public class Shot
         return Objects.hashCode(coordinate, placed);
     }
 
+    @ToJson
     @Override
-    public String toString()
-    {
-        return MoreObjects.toStringHelper(this)
-                          .add("coordinate", coordinate)
-                          .add("placed", placed)
-                          .toString();
-    }
+    public String toString() { throw new UnsupportedOperationException("com.vertigrated.sitd.Shot" + ".toString()"); }
 
     public static class Builder implements com.vertigrated.fluent.Coordinate<On<Build<Shot>, Date>, Integer>
     {

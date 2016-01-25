@@ -12,20 +12,20 @@ import java.io.IOException;
 public class ObjectToJson<T> extends Converter<T, String>
 {
     private final ObjectMapper om;
-    private final Class<T> cls;
+    @SuppressWarnings("unchecked")
+    private final Class<T> cls = (Class<T>) new TypeToken<T>(getClass()) {}.getRawType();
 
     @Inject
     @SuppressWarnings("unchecked")
     ObjectToJson(@Nonnull final ObjectMapper om)
     {
         this.om = om;
-        this.cls = (Class<T>) new TypeToken<T>(getClass()) {}.getRawType();
     }
 
     @Override
     protected String doForward(@Nonnull final T o)
     {
-        try { return om.writeValueAsString(o); }
+        try { return this.om.writeValueAsString(o); }
         catch (final JsonProcessingException e) { throw new RuntimeException(e); }
     }
 
