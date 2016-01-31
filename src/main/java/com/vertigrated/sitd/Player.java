@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.vertigrated.fluent.Build;
+import com.vertigrated.fluent.Name;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -19,10 +20,12 @@ import java.util.UUID;
 public class Player
 {
     public final UUID id;
+    public final String name;
 
-    private Player(@Nonnull final UUID id)
+    private Player(@Nonnull final UUID id, @Nonnull String name)
     {
         this.id = id;
+        this.name = name;
     }
 
     @Override
@@ -48,20 +51,26 @@ public class Player
                           .toString();
     }
 
-    interface PlayerBuilder extends com.vertigrated.fluent.Player<Build<Player>, UUID> {}
 
-    public static class Builder implements PlayerBuilder
+    public static class Builder implements com.vertigrated.fluent.Player<Name<Build<Player>>,UUID>
     {
         @Nonnull
         @Override
-        public Build<Player> player(@Nonnull final UUID player)
+        public Name<Build<Player>> player(@Nonnull final UUID uuid)
         {
-            return new Build<Player>()
-            {
+            return new Name<Build<Player>>() {
+                @Nonnull
                 @Override
-                public Player build()
+                public Build<Player> name(@Nonnull final String name)
                 {
-                    return new Player(player);
+                    return new Build<Player>() {
+                        @Nonnull
+                        @Override
+                        public Player build()
+                        {
+                            return new Player(uuid,name);
+                        }
+                    };
                 }
             };
         }
@@ -74,6 +83,7 @@ public class Player
         {
             gen.writeStartObject();
             gen.writeObjectField("id", value.id);
+            gen.writeStringField("name", value.name);
             gen.writeEndObject();
         }
     }
@@ -84,8 +94,7 @@ public class Player
         @Override
         public Player deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
         {
-            final JsonNode n = p.readValueAsTree();
-            return new Player.Builder().player(p.getCodec().treeToValue(n.get("id"), UUID.class)).build();
+            return null;
         }
     }
 }

@@ -36,6 +36,12 @@ public class DatabaseGameService implements GameService
         return null;
     }
 
+    @Override
+    public Game create(@Nonnull final UUID user, @Nonnull final UUID board)
+    {
+        throw new UnsupportedOperationException("com.vertigrated.sitd.service.DatabaseGameService.create()");
+    }
+
     @Override public Game retrieve(@Nonnull final UUID game)
     {
         throw new UnsupportedOperationException("com.vertigrated.sitd.service.DatabaseGameService.retrieve()");

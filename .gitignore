@@ -6,6 +6,7 @@ target/
 *.class
 sitd/
 derby.log
+src/main/java/Scratch.java
 
 # Package Files #
 *.jar
