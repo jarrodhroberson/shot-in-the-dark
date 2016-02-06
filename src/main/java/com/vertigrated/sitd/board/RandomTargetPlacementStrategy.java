@@ -15,7 +15,6 @@ import java.util.Random;
 import java.util.Set;
 
 import static com.vertigrated.sitd.Orientation.HORIZONTAL;
-import static java.lang.String.format;
 
 public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target>>
 {
@@ -89,7 +88,7 @@ public class RandomTargetPlacementStrategy implements Strategy<Board, Set<Target
             end = new Coordinate(start.x, start.y + size - 1);
         }
         final Coordinates coordinates = new Coordinates(start, end);
-        return new Target(format("%d", ordinal), coordinates);
+        return new Target(coordinates);
     }
 
 }

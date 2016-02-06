@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @JsonSerialize(using = Player.Serializer.class)
 @JsonDeserialize(using = Player.Deserializer.class)
-public class Player
+public class Player implements java.security.Principal
 {
     public final UUID id;
     public final String name;
@@ -32,6 +32,12 @@ public class Player
     public int hashCode()
     {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public String getName()
+    {
+        return this.name;
     }
 
     @Override

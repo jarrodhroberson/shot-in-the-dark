@@ -41,7 +41,7 @@ public class Board
     public final UUID id;
     public final Integer width;
     public final Integer height;
-    final Set<Target> targets;
+    public final Set<Target> targets;
 
     Board(@Nonnull final Integer dimension, @Nonnull final Set<Target> targets)
     {

@@ -15,7 +15,6 @@ import com.google.common.primitives.Longs;
 import com.google.inject.Inject;
 import com.vertigrated.converter.JsonNodeToObject;
 import com.vertigrated.fluent.Build;
-import com.vertigrated.fluent.Name;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,17 +27,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @JsonDeserialize(using = Target.Deserializer.class)
 public class Target implements Comparable<Target>
 {
-    public static final Ordering<Target> NAME = new Ordering<Target>()
-    {
-        @Override public int compare(@Nullable final Target left, @Nullable final Target right)
-        {
-            return checkNotNull(left).name.compareTo(checkNotNull(right).name);
-        }
-    };
-
     public static final Ordering<Target> SIZE = new Ordering<Target>()
     {
-        @Override public int compare(@Nullable final Target left, @Nullable final Target right)
+        @Override
+        public int compare(@Nullable final Target left, @Nullable final Target right)
         {
             return Longs.compare(checkNotNull(left).size(), checkNotNull(right).size());
         }
@@ -46,18 +38,17 @@ public class Target implements Comparable<Target>
 
     public static final Ordering<Target> COORDINATES = new Ordering<Target>()
     {
-        @Override public int compare(@Nullable final Target left, @Nullable final Target right)
+        @Override
+        public int compare(@Nullable final Target left, @Nullable final Target right)
         {
             return checkNotNull(left).coordinates.compareTo(checkNotNull(right).coordinates);
         }
     };
 
-    public final String name;
     public final Coordinates coordinates;
 
-    public Target(@Nonnull final String name, @Nonnull final Coordinates coordinates)
+    public Target(@Nonnull final Coordinates coordinates)
     {
-        this.name = name;
         this.coordinates = coordinates;
     }
 
@@ -77,7 +68,8 @@ public class Target implements Comparable<Target>
     {
         return Iterables.tryFind(this.coordinates.asSet(), new Predicate<Coordinate>()
         {
-            @Override public boolean apply(@Nullable final Coordinate input)
+            @Override
+            public boolean apply(@Nullable final Coordinate input)
             {
                 return coordinate.x.equals(checkNotNull(input).x) && coordinate.y.equals(input.y);
             }
@@ -89,47 +81,44 @@ public class Target implements Comparable<Target>
     @Override
     public int compareTo(@Nonnull final Target o)
     {
-        return SIZE.compound(COORDINATES).compound(NAME).compare(this, o);
+        return SIZE.compound(COORDINATES).compare(this, o);
     }
 
-    @Override public boolean equals(final Object o)
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode(coordinates);
+    }
+
+    @Override
+    public boolean equals(final Object o)
     {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
         final Target target = (Target) o;
-        return Objects.equal(name, target.name) &&
-               Objects.equal(coordinates, target.coordinates);
+        return Objects.equal(coordinates, target.coordinates);
     }
 
-    @Override public int hashCode()
-    {
-        return Objects.hashCode(name, coordinates);
-    }
-
-    @Override public String toString()
+    @Override
+    public String toString()
     {
         return MoreObjects.toStringHelper(this)
-                          .add("name", name)
                           .add("coordinates", coordinates)
                           .toString();
     }
 
-    public static class Builder implements Name<com.vertigrated.fluent.Coordinates<Build<Target>>>
+    public static class Builder implements com.vertigrated.fluent.Coordinates<Build<Target>>
     {
         @Nonnull
-        @Override public com.vertigrated.fluent.Coordinates<Build<Target>> name(@Nonnull final String name)
+        @Override
+        public Build<Target> coordinates(@Nonnull final Coordinates coordinates)
         {
-            return new com.vertigrated.fluent.Coordinates<Build<Target>>()
-            {
-                @Override public Build<Target> coordinates(@Nonnull final Coordinates coordinates)
+            return new Build<Target>() {
+                @Nonnull
+                @Override
+                public Target build()
                 {
-                    return new Build<Target>()
-                    {
-                        @Override public Target build()
-                        {
-                            return new Target(name, coordinates);
-                        }
-                    };
+                    return new Target(coordinates);
                 }
             };
         }
@@ -138,10 +127,10 @@ public class Target implements Comparable<Target>
     public static class Serializer extends JsonSerializer<Target>
     {
 
-        @Override public void serialize(final Target value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
+        @Override
+        public void serialize(final Target value, final JsonGenerator gen, final SerializerProvider serializers) throws IOException, JsonProcessingException
         {
             gen.writeStartObject();
-            gen.writeStringField("name", value.name);
             gen.writeObjectField("coordinates", value.coordinates);
             gen.writeEndObject();
         }
@@ -159,11 +148,11 @@ public class Target implements Comparable<Target>
         }
 
         @Nonnull
-        @Override public Target deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
+        @Override
+        public Target deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException, JsonProcessingException
         {
             final JsonNode n = p.readValueAsTree();
-            return new Builder().name(n.get("name").asText())
-                                .coordinates(this.converter.convert(n.get("coordinates")))
+            return new Builder().coordinates(this.converter.convert(n.get("coordinates")))
                                 .build();
         }
     }

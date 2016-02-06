@@ -11,6 +11,7 @@ CREATE TABLE SITD.BOARD
 CREATE TABLE SITD.TARGET
 (
   BOARD   CHAR(36)              NOT NULL,
+  ORDINAL INT                   NOT NULL,
   START_X INT                   NOT NULL,
   START_Y INT                   NOT NULL,
   END_X   INT                   NOT NULL,
