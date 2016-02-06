@@ -5,7 +5,7 @@ target/
 *.iml
 *.class
 sitd/
-derby.log
+*.log
 src/main/java/Scratch.java
 dependency-reduced-pom.xml
 
