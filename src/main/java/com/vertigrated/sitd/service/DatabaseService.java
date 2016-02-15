@@ -10,7 +10,7 @@ import java.sql.SQLException;
 
 public abstract class DatabaseService
 {
-    private final Provider<DataSource> dataSourceProvider;
+    protected final Provider<DataSource> dataSourceProvider;
 
     @Inject
     protected DatabaseService(@Nonnull final Provider<DataSource> dataSourceProvider)

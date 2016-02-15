@@ -15,5 +15,5 @@ public interface BoardService
     @Nonnull
     public Board retrieve(@Nonnull final UUID uuid);
     @Nonnull
-    public Set<Board> all();
+    public Set<UUID> all();
 }

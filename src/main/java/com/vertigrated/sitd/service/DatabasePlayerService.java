@@ -1,18 +1,22 @@
 package com.vertigrated.sitd.service;
 
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vertigrated.sitd.jooq.PlayerRecordMapper;
+import com.vertigrated.sitd.jooq.SitdRecordMapperProvider;
 import com.vertigrated.sitd.jooq.Tables;
 import com.vertigrated.sitd.jooq.tables.records.PlayerRecord;
 import com.vertigrated.sitd.representation.Player;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.jooq.impl.DefaultConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
+import java.util.Set;
 import java.util.UUID;
 
 public class DatabasePlayerService extends DatabaseService implements PlayerService
@@ -37,24 +41,23 @@ public class DatabasePlayerService extends DatabaseService implements PlayerServ
         return p;
     }
 
-    @Override
-    public Player retrieve(@Nonnull final String name)
+    public Player byName(@Nonnull final String name)
     {
         final DSLContext c = DSL.using(super.connection());
         return c.selectFrom(PLAYER).where(PLAYER.NAME.equal(name)).fetchOne(new PlayerRecordMapper());
     }
 
     @Override
-    public Player retrieve(@Nonnull final UUID uuid)
+    public Player byId(@Nonnull final UUID uuid)
     {
         final DSLContext c = DSL.using(super.connection());
-        final PlayerRecord pr = c.selectFrom(PLAYER).where(PLAYER.ID.equal(uuid.toString())).fetchOne();
-        return new Player.Builder().player(UUID.fromString(pr.getId())).name(pr.getName()).build();
+        return c.selectFrom(PLAYER).where(PLAYER.ID.equal(uuid.toString())).fetchOne(new PlayerRecordMapper());
     }
 
     @Override
-    public Player all()
+    public Set<Player> all()
     {
-        throw new UnsupportedOperationException("com.vertigrated.sitd.service.DatabasePlayerService.all()");
+        final DSLContext c = DSL.using(new DefaultConfiguration().set(super.connection()).set(new SitdRecordMapperProvider()));
+        return ImmutableSortedSet.copyOf(c.selectFrom(PLAYER).orderBy(PLAYER.ID).fetch(new PlayerRecordMapper()));
     }
 }

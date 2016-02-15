@@ -10,6 +10,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import java.util.Set;
 import java.util.UUID;
 
 @Path("/board")
@@ -26,9 +27,17 @@ public class BoardResource implements Resource
     @GET
     @Path("/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
-    public Board get(@Nonnull @PathParam("uuid") final UUID board)
+    public UUID get(@Nonnull @PathParam("uuid") final UUID board)
     {
-        return this.boardService.retrieve(board);
+        return this.boardService.retrieve(board).id;
+    }
+
+    @GET
+    @Path("/all")
+    @Produces({"application/json", "text/xml", "text/csv", "text/html"})
+    public Set<UUID> all()
+    {
+        return this.boardService.all();
     }
 
     @GET

@@ -5,8 +5,7 @@ import com.google.inject.Injector;
 import com.vertigrated.sitd.auth.DatabasePlayerAuthenticator;
 import com.vertigrated.sitd.auth.PlayerAuthorizer;
 import com.vertigrated.sitd.representation.Player;
-import com.vertigrated.sitd.resource.BoardResource;
-import com.vertigrated.sitd.resource.PlayerResource;
+import com.vertigrated.sitd.resource.*;
 import com.vertigrated.sitd.service.DerbyDatabaseServiceModule;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
@@ -32,20 +31,15 @@ public class SitdApplication extends Application<SitdConfiguration>
                 new DerbyDatabaseServiceModule(serviceConfiguration.getDataSourceFactory()));
 
         environment.jersey().register(injector.getInstance(BoardResource.class));
-//        environment.jersey().register(injector.getInstance(GameResource.class));
+        environment.jersey().register(injector.getInstance(GameResource.class));
         environment.jersey().register(injector.getInstance(PlayerResource.class));
-//        environment.jersey().register(injector.getInstance(ReportResource.class));
-//        environment.jersey().register(injector.getInstance(AdminResource.class));
+        environment.jersey().register(injector.getInstance(ReportResource.class));
+        environment.jersey().register(injector.getInstance(AdminResource.class));
         environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<Player>()
                                                                      .setAuthenticator(injector.getInstance(DatabasePlayerAuthenticator.class))
                                                                      .setAuthorizer(injector.getInstance(PlayerAuthorizer.class))
                                                                      .setRealm("PLAYER")
                                                                      .buildAuthFilter()));
-/*        environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<Proctor>()
-                                                                     .setAuthenticator(injector.getInstance(ProctorAuthenticator.class))
-                                                                     .setAuthorizer(injector.getInstance(ProctorAuthorizer.class))
-                                                                     .setRealm("PROCTOR")
-                                                                     .buildAuthFilter()));*/
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Player.class));
     }
 

@@ -9,19 +9,12 @@ import com.vertigrated.sitd.representation.Target;
 import org.jooq.*;
 
 import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 
 import static java.lang.String.format;
 
 public class SitdRecordMapperProvider implements RecordMapperProvider
 {
-    private Provider<DSLContext> dslContextProvider;
-
-    @Inject
-    public SitdRecordMapperProvider(@Nonnull final Provider<DSLContext> dslContextProvider)
-    {
-        this.dslContextProvider = dslContextProvider;
-    }
-
     @Override
     public <R extends Record, E> RecordMapper<R, E> provide(final RecordType<R> recordType, final Class<? extends E> type)
     {
@@ -39,7 +32,7 @@ public class SitdRecordMapperProvider implements RecordMapperProvider
         }
         else if (type == Board.class)
         {
-            return (RecordMapper<R, E>) new BoardRecordMapper(this.dslContextProvider.get());
+            return (RecordMapper<R, E>) new BoardRecordMapper();
         }
         else
         {

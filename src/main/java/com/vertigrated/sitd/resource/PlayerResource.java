@@ -9,6 +9,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import java.util.Set;
 import java.util.UUID;
 
 @Path("/player")
@@ -23,18 +24,26 @@ public class PlayerResource
     }
 
     @GET
-    @Path("/{uuid}")
+    @Path("/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
     public Player get(@Nonnull @PathParam("uuid") final UUID uuid)
     {
-        return this.playerService.retrieve(uuid);
+        return this.playerService.byId(uuid);
     }
 
     @GET
-    @Path("/register/{gmid}")
+    @Path("/register/{gmid:[a-zA-Z0-9]{6}}")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
     public Player register(@Nonnull @PathParam("gmid") final String gmid)
     {
         return this.playerService.create(gmid);
+    }
+
+    @GET
+    @Path("/all")
+    @Produces({"application/json", "text/xml", "text/csv", "text/html"})
+    public Set<Player> all()
+    {
+        return this.playerService.all();
     }
 }

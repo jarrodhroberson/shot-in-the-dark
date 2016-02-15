@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vertigrated.pattern.Strategy;
+import com.vertigrated.sitd.jooq.BoardRecordMapper;
 import com.vertigrated.sitd.jooq.Tables;
 import com.vertigrated.sitd.jooq.tables.records.BoardRecord;
 import com.vertigrated.sitd.jooq.tables.records.TargetRecord;
@@ -82,26 +83,16 @@ public class DatabaseBoardService extends DatabaseService implements BoardServic
 
     @Nonnull
     @Override
-    public Set<Board> all()
+    public Set<UUID> all()
     {
         final DSLContext dsl = DSL.using(super.connection());
-        final ImmutableSet.Builder<Board> issb = ImmutableSet.builder();
-        final Result<BoardRecord> brs = dsl.selectFrom(BOARD).fetch();
-        for (final BoardRecord br : brs)
-        {
-            final Result<TargetRecord> trs = dsl.selectFrom(TARGET).where(TARGET.BOARD.equal(br.getId())).fetch();
-            issb.add(new Board.Builder().dimension(br.getWidth(), br.getHeight()).targets(ImmutableSortedSet.copyOf(Lists.transform(trs, new Function<TargetRecord, Target>()
+        return ImmutableSortedSet.copyOf(Lists.transform(dsl.selectFrom(BOARD).orderBy(BOARD.ID).fetch(BOARD.ID), new Function<String, UUID>() {
+            @Nullable
+            @Override
+            public UUID apply(@Nonnull final String input)
             {
-                @Nullable
-                @Override
-                public Target apply(@Nullable final TargetRecord tr)
-                {
-                    final Coordinate start = new Coordinate(checkNotNull(tr).getStartX(), tr.getStartY());
-                    final Coordinate end = new Coordinate(tr.getEndX(), tr.getEndY());
-                    return new Target(new Coordinates.Builder().start(start).end(end).build());
-                }
-            }))).build());
-        }
-        return issb.build();
+                return UUID.fromString(input);
+            }
+        }));
     }
 }

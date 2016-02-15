@@ -22,7 +22,7 @@ public class SitdConfiguration extends Configuration
     }
 
     @NotEmpty
-    private String pathToProctorCredentials = System.getProperty("user.dir") + "/proctor.credentials";
+    private String pathToProctorCredentials = System.getProperty("user.dir") + "/proctor.credentials.json";
 
     @JsonProperty
     public String getPathToProctorCredentials()
