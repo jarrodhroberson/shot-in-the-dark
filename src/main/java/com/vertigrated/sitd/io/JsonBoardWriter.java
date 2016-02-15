@@ -1,7 +1,7 @@
 package com.vertigrated.sitd.io;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vertigrated.sitd.board.Board;
+import com.vertigrated.sitd.representation.Board;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;

@@ -1,8 +1,8 @@
 package com.vertigrated.sitd.service;
 
 import com.vertigrated.pattern.Strategy;
-import com.vertigrated.sitd.Target;
-import com.vertigrated.sitd.board.Board;
+import com.vertigrated.sitd.representation.Board;
+import com.vertigrated.sitd.representation.Target;
 
 import javax.annotation.Nonnull;
 import java.util.Set;

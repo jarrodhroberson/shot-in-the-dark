@@ -1,6 +1,6 @@
 package com.vertigrated.sitd.io;
 
-import com.vertigrated.sitd.board.Board;
+import com.vertigrated.sitd.representation.Board;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;

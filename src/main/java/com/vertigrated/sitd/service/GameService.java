@@ -1,7 +1,7 @@
 package com.vertigrated.sitd.service;
 
-import com.vertigrated.sitd.Game;
-import com.vertigrated.sitd.board.Board;
+import com.vertigrated.sitd.representation.Board;
+import com.vertigrated.sitd.representation.Game;
 
 import javax.annotation.Nonnull;
 import java.util.Set;

@@ -1,6 +1,6 @@
 package com.vertigrated.sitd.service;
 
-import com.vertigrated.sitd.Player;
+import com.vertigrated.sitd.representation.Player;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;

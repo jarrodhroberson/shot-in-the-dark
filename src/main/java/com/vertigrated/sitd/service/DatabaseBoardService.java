@@ -7,20 +7,20 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.vertigrated.pattern.Strategy;
-import com.vertigrated.sitd.Coordinate;
-import com.vertigrated.sitd.Coordinates;
-import com.vertigrated.sitd.Target;
-import com.vertigrated.sitd.board.Board;
 import com.vertigrated.sitd.jooq.Tables;
 import com.vertigrated.sitd.jooq.tables.records.BoardRecord;
 import com.vertigrated.sitd.jooq.tables.records.TargetRecord;
+import com.vertigrated.sitd.representation.Board;
+import com.vertigrated.sitd.representation.Coordinate;
+import com.vertigrated.sitd.representation.Coordinates;
+import com.vertigrated.sitd.representation.Target;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public class DatabaseBoardService extends DatabaseService implements BoardServic
     private static final com.vertigrated.sitd.jooq.tables.Target TARGET = Tables.TARGET;
 
     @Inject
-    DatabaseBoardService(@Nonnull final Provider<Connection> connectionProvider)
+    DatabaseBoardService(@Nonnull final Provider<DataSource> connectionProvider)
     {
         super(connectionProvider);
     }

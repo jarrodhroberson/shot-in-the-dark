@@ -1,6 +1,6 @@
 package com.vertigrated.fluent;
 
-import com.vertigrated.sitd.Shot;
+import com.vertigrated.sitd.representation.Shot;
 
 import javax.annotation.Nonnull;
 import java.util.List;

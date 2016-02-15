@@ -1,7 +1,7 @@
 package com.vertigrated.sitd.resource;
 
 import com.google.inject.Inject;
-import com.vertigrated.sitd.Game;
+import com.vertigrated.sitd.representation.Game;
 import com.vertigrated.sitd.service.BoardService;
 import com.vertigrated.sitd.service.GameService;
 

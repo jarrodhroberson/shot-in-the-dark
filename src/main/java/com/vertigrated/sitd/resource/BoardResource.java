@@ -1,10 +1,10 @@
 package com.vertigrated.sitd.resource;
 
 import com.google.inject.Inject;
-import com.vertigrated.sitd.Target;
-import com.vertigrated.sitd.board.Board;
-import com.vertigrated.sitd.board.RandomTargetPlacementStrategy;
-import com.vertigrated.sitd.board.SetTargetPlacementStrategy;
+import com.vertigrated.sitd.representation.Board;
+import com.vertigrated.sitd.representation.RandomTargetPlacementStrategy;
+import com.vertigrated.sitd.representation.SetTargetPlacementStrategy;
+import com.vertigrated.sitd.representation.Target;
 import com.vertigrated.sitd.service.BoardService;
 
 import javax.annotation.Nonnull;

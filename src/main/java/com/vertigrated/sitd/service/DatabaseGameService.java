@@ -3,11 +3,11 @@ package com.vertigrated.sitd.service;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provider;
-import com.vertigrated.sitd.Game;
-import com.vertigrated.sitd.Shot;
-import com.vertigrated.sitd.board.Board;
 import com.vertigrated.sitd.jooq.Tables;
 import com.vertigrated.sitd.jooq.tables.records.GameRecord;
+import com.vertigrated.sitd.representation.Board;
+import com.vertigrated.sitd.representation.Game;
+import com.vertigrated.sitd.representation.Shot;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -28,9 +28,9 @@ public class DatabaseGameService extends DatabaseService implements GameService
     private static final com.vertigrated.sitd.jooq.tables.Game GAME = Tables.GAME;
 
     @Inject
-    DatabaseGameService(@Nonnull final Provider<Connection> connectionProvider)
+    DatabaseGameService(@Nonnull final Provider<DataSource> dataSourceProvider)
     {
-        super(connectionProvider);
+        super(dataSourceProvider);
     }
 
     public Game create(@Nonnull final UUID player, @Nonnull final Board board)

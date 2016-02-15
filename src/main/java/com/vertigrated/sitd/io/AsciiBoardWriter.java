@@ -1,7 +1,7 @@
 package com.vertigrated.sitd.io;
 
 import com.google.common.base.Throwables;
-import com.vertigrated.sitd.board.Board;
+import com.vertigrated.sitd.representation.Board;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
