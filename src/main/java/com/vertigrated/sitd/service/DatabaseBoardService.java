@@ -53,7 +53,7 @@ public class DatabaseBoardService extends DatabaseService implements BoardServic
                .set(TARGET.START_X, t.coordinates.start().x)
                .set(TARGET.START_Y, t.coordinates.start().y)
                .set(TARGET.END_X, t.coordinates.end().x)
-               .set(TARGET.END_X, t.coordinates.end().y)
+               .set(TARGET.END_Y, t.coordinates.end().y)
                .execute();
         }
         return b;
