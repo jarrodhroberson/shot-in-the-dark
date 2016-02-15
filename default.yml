@@ -2,4 +2,4 @@ dataSourceFactory:
   driverClass: org.apache.derby.jdbc.EmbeddedDriver
   user: admin
   password: password
-  url: jdbc:derby:/Users/jhr/Projects/shot-in-the-dark/sitd/;create=true
+  url: jdbc:derby:/Users/jhr/Projects/shot-in-the-dark/db/sitd/;create=true

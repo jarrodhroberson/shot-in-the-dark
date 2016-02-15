@@ -5,6 +5,7 @@ target/
 *.iml
 *.class
 *.log
+db/sitd
 src/main/java/Scratch.java
 dependency-reduced-pom.xml
 
