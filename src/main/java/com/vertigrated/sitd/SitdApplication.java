@@ -44,13 +44,12 @@ public class SitdApplication extends Application<SitdConfiguration>
             @Override
             public BeanConfig apply(final Environment environment)
             {
-
                 final BeanConfig config = new BeanConfig();
                 config.setTitle("Shot In The Dark");
                 config.setVersion("1.0.0");
                 config.setResourcePackage("com.vertigrated.sitd.resource");
                 config.setScan(true);
-                config.setBasePath("/api");
+//                config.setBasePath("/api");
                 return config;
             }
         }));
