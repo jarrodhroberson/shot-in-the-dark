@@ -8,6 +8,7 @@ target/
 db
 src/main/java/Scratch.java
 dependency-reduced-pom.xml
+default.yml
 
 # Package Files #
 *.jar
