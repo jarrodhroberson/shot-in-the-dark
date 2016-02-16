@@ -12,8 +12,11 @@ import com.google.inject.Inject;
 import com.vertigrated.sitd.service.BoardService;
 import com.vertigrated.sitd.service.GameService;
 import com.vertigrated.sitd.service.PlayerService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Path("/report")
+@Api("Reporting")
 public class ReportResource
 {
     private final PlayerService playerService;
@@ -30,6 +33,7 @@ public class ReportResource
 
     @GET
     @Path("/games/{player:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
+    @ApiOperation("Get a list of Games by Player")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
     public Set<UUID> getGamesByPlayer(@Nonnull @PathParam("player") final UUID player)
     {

@@ -20,8 +20,11 @@ import com.vertigrated.sitd.representation.Game;
 import com.vertigrated.sitd.representation.Shot;
 import com.vertigrated.sitd.service.BoardService;
 import com.vertigrated.sitd.service.GameService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Path("/game")
+@Api("Game")
 public class GameResource implements Resource
 {
     private final GameService gameService;
@@ -36,6 +39,7 @@ public class GameResource implements Resource
 
     @GET
     @Path("/{player:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/{board:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
+    @ApiOperation("Create a New Game for a Player using a Board")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
     public Game newGame(@Nonnull @PathParam("player") final UUID player, @Nonnull final @PathParam("board") UUID board)
     {
@@ -44,6 +48,7 @@ public class GameResource implements Resource
 
     @GET
     @Path("/{uuid:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}")
+    @ApiOperation("Get an existing Game by Id")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
     public Game get(@Nonnull @PathParam("uuid") final UUID game)
     {
@@ -52,6 +57,7 @@ public class GameResource implements Resource
 
     @GET
     @Path("/shoot/{game:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}}/{x:\\d+}/{y:\\d+}")
+    @ApiOperation("Shoot at a Coordinate in a Game")
     @Produces({"application/json", "text/xml", "text/csv", "text/html"})
     public Response shoot(@Nonnull @PathParam("game") final UUID game, @Nonnull @PathParam("x") Integer x, @Nonnull @PathParam("y") Integer y)
     {
