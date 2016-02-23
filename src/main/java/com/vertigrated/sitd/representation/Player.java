@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @JsonSerialize(using = Player.Serializer.class)
 @JsonDeserialize(using = Player.Deserializer.class)
-public class Player implements java.security.Principal
+public class Player implements java.security.Principal, Comparable<Player>
 {
     public final UUID id;
     public final String name;
@@ -26,6 +26,12 @@ public class Player implements java.security.Principal
     {
         this.id = id;
         this.name = name;
+    }
+
+    @Override
+    public int compareTo(@Nonnull final Player o)
+    {
+        return this.name.compareTo(o.name);
     }
 
     @Override
