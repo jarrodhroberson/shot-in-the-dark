@@ -1,0 +1,12 @@
+--liquibase formatted sql
+
+--changeset jhr:7
+CREATE TABLE SITD.GAME
+(
+  ID      CHAR(36) PRIMARY KEY                NOT NULL,
+  PLAYER  CHAR(36)                            NOT NULL,
+  BOARD   CHAR(36)                            NOT NULL,
+  CREATED TIMESTAMP DEFAULT current_timestamp NOT NULL,
+  CONSTRAINT GAME_BOARD_FK FOREIGN KEY (BOARD) REFERENCES SITD.BOARD (ID),
+  CONSTRAINT GAME_PLAYER_FK FOREIGN KEY (PLAYER) REFERENCES SITD.PLAYER (ID)
+);

@@ -12,13 +12,13 @@ public class SitdConfiguration extends Configuration
 {
     @Valid
     @Nonnull
-    @JsonProperty
     private DataSourceFactory dataSourceFactory = new DataSourceFactory();
 
     @Nonnull
+    @JsonProperty("database")
     public DataSourceFactory getDataSourceFactory()
     {
-        return dataSourceFactory;
+        return this.dataSourceFactory;
     }
 
     @NotEmpty

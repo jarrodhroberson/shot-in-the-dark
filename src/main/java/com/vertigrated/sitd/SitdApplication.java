@@ -1,8 +1,5 @@
 package com.vertigrated.sitd;
 
-import java.util.function.Function;
-import javax.annotation.Nonnull;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -15,30 +12,33 @@ import io.dropwizard.Application;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.AuthValueFactoryProvider;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
-import io.dropwizard.configuration.ResourceConfigurationSourceProvider;
+import io.dropwizard.db.PooledDataSourceFactory;
+import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 import io.paradoxical.dropwizard.swagger.AdminResourceConfigurator;
-import io.paradoxical.dropwizard.swagger.SwaggerAdminAssetsBundle;
 import io.paradoxical.dropwizard.swagger.SwaggerAssetsBundle;
 import io.swagger.jaxrs.config.BeanConfig;
 
+import javax.annotation.Nonnull;
+import java.util.function.Function;
+
 public class SitdApplication extends Application<SitdConfiguration>
 {
-    public static void main(final String[] args) throws Exception
-    {
-        new SitdApplication().run(args);
-    }
-    private final AdminResourceConfigurator adminResourceConfigurator = AdminResourceConfigurator.builder()
-                                                                                                 .adminRootPath("/admin").build();
+    private final AdminResourceConfigurator adminResourceConfigurator = AdminResourceConfigurator.builder().adminRootPath("/admin").build();
 
     @Override
     public void initialize(@Nonnull final Bootstrap<SitdConfiguration> bootstrap)
     {
-        bootstrap.addBundle(new ViewBundle<>());
-//        bootstrap.addBundle(this.adminResourceConfigurator);
-//        bootstrap.addBundle(new SwaggerAdminAssetsBundle());
+        bootstrap.addBundle(new ViewBundle<SitdConfiguration>());
+        bootstrap.addBundle(new MigrationsBundle<SitdConfiguration>() {
+            @Override
+            public PooledDataSourceFactory getDataSourceFactory(final SitdConfiguration configuration)
+            {
+                return configuration.getDataSourceFactory();
+            }
+        });
         bootstrap.addBundle(new SwaggerAssetsBundle(new Function<Environment, BeanConfig>()
         {
             @Override
@@ -49,23 +49,9 @@ public class SitdApplication extends Application<SitdConfiguration>
                 config.setVersion("1.0.0");
                 config.setResourcePackage("com.vertigrated.sitd.resource");
                 config.setScan(true);
-//                config.setBasePath("/api");
                 return config;
             }
         }));
-    }
-
-    private BeanConfig getAdminSwaggerScanner()
-    {
-        final BeanConfig config = new BeanConfig();
-        config.setTitle("Admin API");
-        config.setDescription("Admin API");
-        config.setResourcePackage(AdminResource.class.getPackage().getName());
-        config.setContact("admin@site.com");
-        config.setPrettyPrint(true);
-        config.setVersion("1.0.0");
-        config.setBasePath("/admin");
-        return config;
     }
 
     @Override
@@ -81,11 +67,29 @@ public class SitdApplication extends Application<SitdConfiguration>
         environment.jersey().register(injector.getInstance(ReportResource.class));
         environment.jersey().register(injector.getInstance(AdminResource.class));
         environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<Player>()
-                .setAuthenticator(injector.getInstance(DatabasePlayerAuthenticator.class))
-                .setAuthorizer(injector.getInstance(PlayerAuthorizer.class))
-                .setRealm("PLAYER")
-                .buildAuthFilter()));
+                                                                     .setAuthenticator(injector.getInstance(DatabasePlayerAuthenticator.class))
+                                                                     .setAuthorizer(injector.getInstance(PlayerAuthorizer.class))
+                                                                     .setRealm("PLAYER")
+                                                                     .buildAuthFilter()));
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(Player.class));
         environment.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
+
+    private BeanConfig getAdminSwaggerScanner()
+    {
+        final BeanConfig config = new BeanConfig();
+        config.setTitle("Admin API");
+        config.setDescription("Admin API");
+        config.setResourcePackage(AdminResource.class.getPackage().getName());
+        config.setContact("admin@site.com");
+        config.setPrettyPrint(true);
+        config.setVersion("1.0.0");
+        config.setBasePath("/admin");
+        return config;
+    }
+
+    public static void main(final String[] args) throws Exception
+    {
+        new SitdApplication().run(args);
     }
 }
