@@ -1,6 +1,6 @@
 database:
   driverClass: org.apache.derby.jdbc.EmbeddedDriver
-  url: jdbc:derby:/Users/jhr/Projects/shot-in-the-dark/db/sitd;create=true
+  url: jdbc:derby:db/sitd;create=true
   user: admin
   password: password
   logValidationErrors: true

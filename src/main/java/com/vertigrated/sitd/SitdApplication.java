@@ -31,7 +31,7 @@ public class SitdApplication extends Application<SitdConfiguration>
     @Override
     public void initialize(@Nonnull final Bootstrap<SitdConfiguration> bootstrap)
     {
-        bootstrap.addBundle(new ViewBundle<SitdConfiguration>());
+        bootstrap.addBundle(new ViewBundle<>());
         bootstrap.addBundle(new MigrationsBundle<SitdConfiguration>() {
             @Override
             public PooledDataSourceFactory getDataSourceFactory(final SitdConfiguration configuration)
